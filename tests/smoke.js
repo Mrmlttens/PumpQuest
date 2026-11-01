@@ -1,0 +1,33 @@
+/* Zero-dependency smoke test for the app's browser-independent core interactions. */
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const root=path.resolve(__dirname,'..');
+const elements=new Map();
+function element(id){if(!elements.has(id))elements.set(id,{innerHTML:'',classList:{add(){},remove(){}},value:'',style:{},addEventListener(){},append(){},remove(){}});return elements.get(id)}
+const listeners={};
+const store=new Map();
+const context={console,Date,Math,JSON,Number,String,Array,Map,Set,Promise,setInterval:()=>{},setTimeout:()=>0,clearTimeout:()=>{},structuredClone,location:{protocol:'file:'},navigator:{},window:{scrollTo(){}},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{querySelector:s=>element(s),addEventListener:(name,fn)=>listeners[name]=fn},};
+context.window.window=context.window;
+vm.createContext(context);
+vm.runInContext(fs.readFileSync(path.join(root,'data.js'),'utf8'),context);
+vm.runInContext(fs.readFileSync(path.join(root,'app.js'),'utf8'),context);
+const click=(action,dataset={})=>{const target={dataset:{action,...dataset},closest:()=>target};listeners.click({target,preventDefault(){}})};
+const input=(field,index,set,value)=>listeners.input({target:{dataset:{input:field,index:String(index),set:String(set)},value:String(value)}});
+assert(element('#app').innerHTML.includes('Every rep'),'Home page rendered');
+assert(element('#app').innerHTML.includes('BLOB BRUISER'),'Original avatar rendered');
+click('startRoutine',{id:'push'});
+assert(element('#app').innerHTML.includes('WORKOUT IN PROGRESS'),'Can start a saved routine');
+input('weight',0,0,135);input('reps',0,0,10);
+click('toggleSet',{index:'0',set:'0'});
+click('finishWorkout');
+const saved=JSON.parse(store.get('pumpquest.save.v1'));
+assert(saved.workouts.length===1,'Completed workout persisted');
+assert(saved.workouts[0].exercises[0].sets[0].weight===135,'Logged weights retained');
+assert(saved.profile.totalXp===108,'XP awarded');
+assert(element('#modal-root').innerHTML.includes('QUEST COMPLETE'),'Summary shown');
+click('goHome');
+assert(element('#app').innerHTML.includes('PUMP ACTIVE'),'Recently trained muscles glow');
+click('nav',{view:'history'});
+assert(element('#app').innerHTML.includes('Training stats.'),'History screen rendered');
+click('nav',{view:'locker'});
+assert(element('#app').innerHTML.includes('Choose your champion'),'Character selection available');
+console.log('PASS: home, avatar, routine start, set logging, XP, completion, pump, history, locker');
