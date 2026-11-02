@@ -6,7 +6,7 @@ PumpQuest is a free, mobile-first, offline-capable workout logger with a playful
 
 ![PumpQuest](./assets/icon-192.png)
 
-## Version 0.2 (playable mobile prototype)
+## Version 0.3 (playable mobile prototype)
 
 - Detailed original **Storm Titan** with minimal breathing animation and configurable Storm/Tide/Ember ambient particle effects. More creature designs planned.
 - A functional **19-region front/back anatomy map** with hot/warm/neutral/cold/untracked states based on workout history. Cold requires >=14 days since logged stimulation. Preview mode is visual only.
@@ -33,7 +33,7 @@ Go to `http://localhost:8000/`. On Android, visit the HTTPS GitHub Pages site in
 1. Create a **public** repository named `pumpquest` on GitHub, with no initial README, `.gitignore` or license.
 2. Upload or push the contents of this folder to the repository's `main` branch, **including** `.github/workflows/pages.yml` and `.nojekyll`.
 3. In the repository go to **Settings → Pages → Build and deployment → GitHub Actions** (once the repository has the files).
-4. GitHub Actions deploys to `https://YOUR_USERNAME.github.io/pumpquest/`.
+4. GitHub Actions deploys to `https://YOUR_USERNAME.github.io/PumpQuest/`.
 
 Run `node tests/smoke.js` to check the basic workout, XP, and character flows.
 
@@ -75,3 +75,13 @@ MIT — see [LICENSE](LICENSE). Original character designs; no third-party game 
 - Retains saved v0.1 workout history and XP, local-only storage, export/import, and 80 exercises.
 - Motion is deliberately subtle, honors reduced-motion, and uses a reusable original fantasy titan asset.
 - Body-map logic estimates *training recency*, not actual muscle recovery or injury risk.
+
+## Hosting status / interim live preview
+
+A GitHub Pages workflow for this repository is included but GitHub Pages must be enabled once in **Settings → Pages → Build and deployment → GitHub Actions**. The repository's normal `GITHUB_TOKEN` cannot provision Pages when disabled. Until it is enabled, the same self-contained build can be hosted at an isolated `/pumpquest/` subpath of an already-enabled site. This is a *preview mirror*, not a separate database, and app saves remain in the browser origin. A dedicated Pages URL uses a different origin, so back up data as JSON before switching.
+
+This version deliberately uses one cinematic original titan with three atmospheric modes, rather than representing filters as different character models. Additional creature models are future features. 
+
+## Tests
+
+`node tests/smoke.js` and `node tests/anatomy.js` pass. A mobile Chromium interaction pass also verified routine selection, set entry, workout completion, XP, pump, front/back anatomy, and aura selection (performed locally; test harness does not run in GitHub Actions).
