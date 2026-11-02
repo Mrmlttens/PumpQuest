@@ -6,10 +6,10 @@ PumpQuest is a free, mobile-first, offline-capable workout logger with a playful
 
 ![PumpQuest](./assets/icon-192.png)
 
-## Version 0.1 (playable prototype)
+## Version 0.2 (playable mobile prototype)
 
-- Animated original **Blob Bruiser**, **Shell Titan**, and **Kaiju Brute** character archetypes.
-- Glowing muscle hotspots based on completed sets in the last 24 hours; preview mode is visual only.
+- Detailed original **Storm Titan** with minimal breathing animation and configurable Storm/Tide/Ember ambient particle effects. More creature designs planned.
+- A functional **19-region front/back anatomy map** with hot/warm/neutral/cold/untracked states based on workout history. Cold requires >=14 days since logged stimulation. Preview mode is visual only.
 - Starter four-day **Push / Pull / Legs / Upper** routine templates.
 - Create, edit, delete and save custom splits, including set count, rep range and rest intervals.
 - Offline exercise library with 80 movements, muscle search/filter and custom exercises.
@@ -30,10 +30,10 @@ Go to `http://localhost:8000/`. On Android, visit the HTTPS GitHub Pages site in
 
 ## Publish it on GitHub Pages (free)
 
-1. Create a **public** repository named `PumpQuest` on GitHub, with no initial README, `.gitignore` or license.
+1. Create a **public** repository named `pumpquest` on GitHub, with no initial README, `.gitignore` or license.
 2. Upload or push the contents of this folder to the repository's `main` branch, **including** `.github/workflows/pages.yml` and `.nojekyll`.
 3. In the repository go to **Settings → Pages → Build and deployment → GitHub Actions** (once the repository has the files).
-4. GitHub Actions deploys to `https://YOUR_USERNAME.github.io/PumpQuest/`.
+4. GitHub Actions deploys to `https://YOUR_USERNAME.github.io/pumpquest/`.
 
 Run `node tests/smoke.js` to check the basic workout, XP, and character flows.
 
@@ -66,3 +66,12 @@ A session must have at least one checked set with a valid weight and rep value t
 ## License
 
 MIT — see [LICENSE](LICENSE). Original character designs; no third-party game character artwork or assets included.
+
+
+### What changed in v0.2
+
+- Simpler character-first home: one primary Start/Resume button, quick routine access, compact muscle radar.
+- 19-zone body map on Stats, with front/back toggle, tappable regions and 14-day cold spots. Untracked areas are not considered cold.
+- Retains saved v0.1 workout history and XP, local-only storage, export/import, and 80 exercises.
+- Motion is deliberately subtle, honors reduced-motion, and uses a reusable original fantasy titan asset.
+- Body-map logic estimates *training recency*, not actual muscle recovery or injury risk.
