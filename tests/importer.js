@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict');
+global.window={};require('../importer.js');require('../insights.js');require('../data.js');
+const imp=window.PQ_IMPORT;
+const csv=`title,start_time,end_time,description,exercise_title,superset_id,exercise_notes,set_index,set_type,weight_lbs,reps,distance_miles,duration_seconds,rpe\n"Push, A","15 Jul 2026, 09:52","15 Jul 2026, 10:35",Good session,"Bench Press (Barbell)",,Notes,0,warmup,95,10,,,7\n"Push, A","15 Jul 2026, 09:52","15 Jul 2026, 10:35",Good session,"Bench Press (Barbell)",,Notes,1,normal,185,8,,,9\n"Push, A","15 Jul 2026, 09:52","15 Jul 2026, 10:35",Good session,"Incline Dumbbell Press",,,0,normal,65,8,,,8\n"Pull A","14 Jul 2026, 09:52","14 Jul 2026, 10:40",,"Chest-Supported Row",,,0,normal,145,12,,,8\n`;
+assert.equal(imp.csvRows('a,b\n"a,b","x""y"').at(-1)[0],'a,b');
+const converted=imp.toWorkouts(csv,window.PQ_EXERCISES,[],[],'lb');
+assert.equal(converted.workouts.length,2);
+assert.equal(converted.importedSets,4);
+assert.equal(converted.workouts.find(x=>x.name==='Push, A').exercises[0].sets[1].weight,185);
+assert.equal(converted.workouts[0].earnedXp,0);
+assert.throws(()=>imp.toWorkouts(csv,window.PQ_EXERCISES,converted.customExercises,converted.workouts,'lb'),/No new completed sets/);
+const kg=imp.toWorkouts(csv,window.PQ_EXERCISES,[],[],'kg');assert(Math.abs(kg.workouts[0].exercises[0].sets[1].weight-83.91)<0.02);
+const metrics=window.PQ_INSIGHTS.metrics(converted.workouts, id=>window.PQ_EXERCISES.find(x=>x.id===id)||converted.customExercises.find(x=>x.id===id),Date.parse('2026-08-01T12:00:00Z'),'lb');
+assert.equal(metrics.total,2);assert(metrics.bests.length>=2);assert(metrics.periods[2].sets>=3);
+console.log('PASS: Hevy import, quoted CSV, duplicate protection, units, historical records and analytics');

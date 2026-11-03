@@ -19,9 +19,13 @@ jobs:
         run: |
           node --check scene3d.js
           node --check app.js
+          node --check importer.js
+          node --check insights.js
       - name: Exercise, XP, and saved-workout tests
         run: node tests/smoke.js
       - name: Anatomy and 14-day cold spot tests
         run: node tests/anatomy.js
       - name: Three distinct 3D champions and render switching
         run: node tests/characters.js
+      - name: Hevy import, deduplication, conversion and progress analytics
+        run: node tests/importer.js

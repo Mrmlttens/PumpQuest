@@ -1,4 +1,4 @@
-/* PumpQuest v0.5 — three distinct original procedural WebGL characters, no CDN required.
+/* PumpQuest Release 1.0 — three distinct original procedural WebGL characters, no CDN required.
    This is actual perspective 3D geometry with orbit/pinch controls, not a static illustration. */
 (function(root){
 'use strict';
@@ -30,7 +30,7 @@ for(let i=0;i<segments;i++){let j=2+2*i;tri(g,j,j+1,j+2);tri(g,j+1,j+3,j+2);tri(
 function octa(){let g=geo(),p=[[0,1,0],[1,0,0],[0,0,1],[-1,0,0],[0,0,-1],[0,-1,0]];for(let q of [[0,2,1],[0,3,2],[0,4,3],[0,1,4],[5,1,2],[5,2,3],[5,3,4],[5,4,1]]){const a=p[q[0]],b=p[q[1]],c=p[q[2]],n=norm(cross(sub(b,a),sub(c,a))),v=q.map(k=>vertex(g,p[k],n));tri(g,...v)}return g}
 function tube(points,radii,segments=12){const g=geo();for(let j=0;j<points.length;j++){const tangent=norm(sub(points[Math.min(j+1,points.length-1)],points[Math.max(0,j-1)]));let side=norm(cross(Math.abs(tangent[1])>.88?[1,0,0]:[0,1,0],tangent)),bit=norm(cross(tangent,side));for(let i=0;i<=segments;i++){let t=2*PI*i/segments,n=norm(add(mul(side,Math.cos(t)),mul(bit,Math.sin(t))));vertex(g,add(points[j],mul(n,radii[j])),n)}}for(let j=0;j<points.length-1;j++)for(let i=0;i<segments;i++){let a=j*(segments+1)+i,b=a+segments+1;tri(g,a,a+1,b);tri(g,b,a+1,b+1)}return g}
 function yAxisTransform(a,b,r1,r2){const dir=sub(b,a),dy=Math.hypot(...dir);let y=norm(dir),x=norm(cross(Math.abs(y[2])>.92?[0,1,0]:[0,0,1],y)),z=cross(x,y);return [x[0]*r1,x[1]*r1,x[2]*r1,0,y[0]*dy,y[1]*dy,y[2]*dy,0,z[0]*r2,z[1]*r2,z[2]*r2,0,...a,1]}
-const MATERIALS={skin:[.36,.225,.155],skinLight:[.48,.31,.22],muzzle:[.31,.25,.21],dark:[.10,.12,.15],nose:[.19,.15,.14],fur:[.74,.69,.60],furDark:[.47,.43,.39],iron:[.30,.37,.42],steel:[.46,.53,.57],gold:[.73,.51,.24],goldBright:[.92,.71,.36],leather:[.23,.17,.13],brown:[.34,.23,.16],horn:[.51,.36,.25],tip:[.88,.75,.55],rock:[.16,.23,.32],gem:[.18,.71,1.0],ice:[.48,.83,1.0],black:[.08,.08,.09],shell:[.07,.30,.33],shellPlate:[.19,.54,.50],ridge:[.14,.45,.46],lava:[.95,.22,.08],tooth:[.88,.80,.62],scale:[.22,.32,.32]};
+const MATERIALS={skin:[.46,.285,.198],skinLight:[.54,.352,.255],muzzle:[.31,.25,.21],dark:[.10,.12,.15],nose:[.19,.15,.14],fur:[.83,.79,.69],furDark:[.47,.43,.39],iron:[.35,.41,.47],steel:[.52,.57,.64],gold:[.83,.58,.28],goldBright:[.92,.71,.36],leather:[.23,.17,.13],brown:[.34,.23,.16],horn:[.51,.36,.25],tip:[.88,.75,.55],rock:[.15,.22,.31],gem:[.18,.71,1.0],ice:[.48,.83,1.0],black:[.08,.08,.09],shell:[.07,.30,.33],shellPlate:[.19,.54,.50],ridge:[.14,.45,.46],lava:[.95,.22,.08],tooth:[.88,.80,.62],scale:[.22,.32,.32]};
 const PALETTES={
  bruiser:{},
  shell:{skin:[.12,.40,.40],skinLight:[.26,.60,.55],muzzle:[.12,.39,.40],fur:[.25,.62,.59],furDark:[.07,.31,.34],iron:[.21,.46,.52],steel:[.39,.70,.69],gold:[.61,.54,.34],goldBright:[.81,.74,.43],leather:[.10,.28,.34],brown:[.24,.53,.51],horn:[.30,.73,.73],tip:[.64,.98,.90],nose:[.10,.25,.29],gem:[.20,.95,.87],ice:[.42,1,.90]},
@@ -47,16 +47,28 @@ precision highp float;
 in vec3 vN,vWorld,vLocal;out vec4 frag;
 uniform vec3 uColor,uGlow,uEye;uniform float uMetal,uRough,uTime,uHot,uCold,uFur;
 float hash(vec3 p){p=fract(p*.1031);p+=dot(p,p.yxz+33.33);return fract((p.x+p.y)*p.z);}
-void main(){vec3 n=normalize(vN),p=vWorld;float noise=hash(floor(p*22.));float fine=(noise-.5);n=normalize(n+vec3(fine*.055,-fine*.03,fine*.035));
-vec3 a=normalize(vec3(-.47,.78,.65)),b=normalize(vec3(.65,.34,-.6));float da=max(0.,dot(n,a)),db=max(0.,dot(n,b));float rim=pow(1.-abs(dot(n,normalize(vec3(-p.x*.025,.07,1.0)))),2.2);
-float fiber=uFur*(.50+.50*sin(p.y*180.+p.x*45.))*0.08;vec3 base=uColor*(.89+fine*.15+fiber);
-vec3 color=base*(.21+da*.95+db*.25)+vec3(.18,.40,.68)*rim*.45;
-vec3 halfv=normalize(a+normalize(vec3(-p.x*.03,.2,1.)));float spec=pow(max(0.,dot(n,halfv)),mix(19.,70.,uMetal));color+=vec3(.90,.77,.60)*spec*(.07+uMetal*.75);
-vec3 hColor=mix(vec3(1.,.27,.09),vec3(.98,.70,.16),.35+sin(p.x*6.)*.12);
-color+=hColor*uHot*(.18+.35*rim)+vec3(.06,.56,1.)*uCold*(.22+.5*rim);
-color+=uGlow*(.88+.16*sin(uTime*1.5));
-color=mix(color,vec3(.43,.70,.96),rim*.09);
-frag=vec4(pow(max(color,vec3(0.)),vec3(.91)),1.0);
+float noise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+void main(){
+ vec3 n=normalize(vN);vec3 p=vWorld;
+ float pores=noise(p*43.)-.5;float grain=noise(p*8.)-.5;
+ vec3 key=normalize(vec3(-.55,.82,1.25)),fill=normalize(vec3(.83,.36,-.53)),back=normalize(vec3(.02,.47,-1.));
+ vec3 view=normalize(vec3(-p.x*.036,3.45-p.y,11.-p.z));
+ float diffuse=max(0.,dot(n,key)),cool=max(0.,dot(n,fill)),rim=pow(1.-clamp(dot(n,view),0.,1.),2.65);
+ float backLight=max(0.,dot(n,back));
+ float fiber=uFur*(.5+.5*sin(p.y*157.+p.x*73.+grain*16.))*.05;
+ vec3 surface=uColor*(.94+grain*(uMetal>.5?.12:.26)+pores*.12+fiber);
+ vec3 ambient=vec3(.15,.19,.26);
+ vec3 color=surface*(ambient+vec3(1.34,1.13,.88)*diffuse*.78+vec3(.35,.66,.83)*cool*.33);
+ color+=surface*vec3(.21,.61,.95)*rim*.73;
+ color+=vec3(.55,.88,1.)*backLight*.09;
+ vec3 halfv=normalize(key+view);float roughness=mix(31.,105.,uMetal);float spec=pow(max(0.,dot(n,halfv)),roughness);
+ color+=mix(vec3(.58,.60,.61),surface*1.5,uMetal)*spec*(.13+1.5*uMetal);
+ // Tone-mapped environmental highlights make stone, fur, steel and leather distinct.
+ color+=vec3(1.0,.40,.12)*uHot*(.13+.37*rim)+vec3(.03,.58,1.)*uCold*(.17+.52*rim);
+ color+=uGlow*(.82+.23*sin(uTime*1.7));
+ color=color/(color+vec3(.44));
+ color=pow(max(color,vec3(0.)),vec3(.93));
+ frag=vec4(color,1.0);
 }`;
 const PVS=`#version 300 es
 precision highp float;
@@ -99,14 +111,14 @@ for(let s of [-1,1]){
 ell('skin',[0,3.87,-.08],[1.04,1.23,.62],{region:'abs',motion:'chest'});
 ell('skinLight',[0,3.35,.40],[.74,.75,.23],{region:'abs',motion:'chest'});
 for(let s of [-1,1]){
- ell('skin',[s*.60,4.5,.37],[.70,.48,.43],{region:'upperChest',rz:s*.08,motion:'chest'});
- ell('skinLight',[s*.60,4.19,.50],[.64,.32,.34],{region:'lowerChest',motion:'chest'});
+ ell('skin',[s*.60,4.5,.37],[.71,.42,.38],{region:'upperChest',rz:s*.08,motion:'chest'});
+ ell('skinLight',[s*.60,4.19,.50],[.62,.30,.29],{region:'lowerChest',motion:'chest'});
  ell('skin',[s*.92,3.90,-.07],[.36,.85,.43],{region:'lats',rz:s*.2,motion:'chest'});
  ell('skinLight',[s*.77,3.36,.34],[.28,.65,.25],{region:'obliques',rz:s*.14,motion:'chest'});
  ell('skin',[s*.44,4.43,-.61],[.66,.51,.30],{region:'midBack',motion:'chest'});
  ell('skin',[s*.72,3.88,-.58],[.42,.80,.32],{region:'lats',motion:'chest'});
  ell('skin',[s*.51,3.28,-.48],[.35,.40,.27],{region:'lowerBack'});
- for(let j=0;j<3;j++)ell('skinLight',[s*.23,3.76-j*.30,.55],[.22,.165,.24],{region:'abs',motion:'chest'});
+ for(let j=0;j<3;j++)ell('skinLight',[s*.23,3.76-j*.30,.55],[.24,.133,.15],{region:'abs',motion:'chest'});
 }
 // Massive trapezius collar and shoulders.
 ell('skin',[0,4.85,-.23],[1.12,.38,.62],{region:'traps',motion:'chest'});
@@ -234,6 +246,19 @@ if(character==='bruiser'){
   fur([s*1.28,4.95,-.20],[s*1.48,5.45,-.16],.20,'ridge');
  }
 }
+// Real equipable 3D cosmetics. Hidden until unlocked and equipped.
+for(let side of [-1,1]){
+ ell('goldBright',[side*1.92,2.35,.44],[.40,.15,.18],{name:'gear-wraps',metal:.95});
+ ell('goldBright',[side*1.92,2.16,.45],[.40,.24,.25],{name:'gear-gold',metal:.95});
+ for(let f=0;f<3;f++)ell('gold',[side*1.93,2.24-f*.10,.66],[.30,.025,.055],{name:'gear-gold',metal:.9});
+ ell('black',[side*.27,5.62,.73],[.20,.13,.12],{name:'gear-shades',metal:.5});
+ ell('steel',[side*.28,5.64,.79],[.18,.03,.03],{name:'gear-shades',metal:.85});
+}
+ell('gold',[0,6.30,.24],[.42,.17,.34],{name:'gear-crown',metal:.95});
+for(let i=-3;i<=3;i++){
+ let x=i*.13;fur([x,6.32,.32],[x,6.53+(3-Math.abs(i))*.065,.35],.065,'goldBright',{name:'gear-crown',metal:.98});
+}
+attach(lib.gem,'gem',[0,6.42,.57],[.11,.14,.07],{name:'gear-crown',glow:.65,metal:.7});
 // Rune tattoos and stone shards on the 3D armor.
 for(let s of [-1,1]){
  attach(lib.gem,'gem',[s*1.46,4.87,.15],[.10,.16,.07],{glow:.40,metal:.65});
@@ -259,24 +284,24 @@ function init(canvas){let gl=canvas.getContext('webgl2',{antialias:true,alpha:tr
  const pUni={P:get(pp,'uP'),V:get(pp,'uV'),time:get(pp,'uTime'),tint:get(pp,'uTint'),kind:get(pp,'uKind')};
  const pbuf=gl.createVertexArray();gl.bindVertexArray(pbuf);const pv=[],ps=[];for(let i=0;i<110;i++){let a=i*2.399963,rad=.5+(i%11)*.16;pv.push(Math.cos(a)*rad,.05+(i%9)*.46,Math.sin(a)*.9);ps.push((i*.75487766)%1,(i*.414213)%1,(i*.332718)%1,(i*.193)%1);}for(let [loc,arr,sz] of [[0,pv,3],[2,ps,4]]){let b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(arr),gl.STATIC_DRAW);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,sz,gl.FLOAT,false,0,0)}gl.bindVertexArray(null);
  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
- let angle=-.12,targetAngle=-.12,zoom=11.55,targetZoom=11.55,active=true,anim=0,last=0,raf=0,mode='storm',zones={},pumps={},focused=false,spin=null,touches=new Map(),lastPinch=0;
+ let accent='default',gear={aura:'base',head:'base',outfit:'base'},angle=-.12,targetAngle=-.12,zoom=12.15,targetZoom=12.15,active=true,anim=0,last=0,raf=0,mode='storm',zones={},pumps={},focused=false,spin=null,touches=new Map(),lastPinch=0;
  const colors={storm:[.24,.72,1],tide:[.15,1,.82],ember:[1,.41,.18]};
  const resize=()=>{const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);let ratio=Math.min(devicePixelRatio||1,1.65),width=Math.floor(w*ratio),height=Math.floor(h*ratio);if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}gl.viewport(0,0,width,height)};
  const touchDown=e=>{if(e.target!==canvas)return;canvas.setPointerCapture(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===2){let pts=[...touches.values()];lastPinch=Math.hypot(pts[0][0]-pts[1][0],pts[0][1]-pts[1][1])}spin=e.clientX};
- const touchMove=e=>{if(!touches.has(e.pointerId))return;let prev=touches.get(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===1)targetAngle+=clamp((e.clientX-prev[0])*.011,-.22,.22);else if(touches.size===2){let pts=[...touches.values()],dist=Math.hypot(pts[0][0]-pts[1][0],pts[0][1]-pts[1][1]);targetZoom=clamp(targetZoom-(dist-lastPinch)*.015,9.5,15.0);lastPinch=dist}};
+ const touchMove=e=>{if(!touches.has(e.pointerId))return;let prev=touches.get(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===1)targetAngle+=clamp((e.clientX-prev[0])*.011,-.22,.22);else if(touches.size===2){let pts=[...touches.values()],dist=Math.hypot(pts[0][0]-pts[1][0],pts[0][1]-pts[1][1]);targetZoom=clamp(targetZoom-(dist-lastPinch)*.015,10.5,15.6);lastPinch=dist}};
  const touchUp=e=>{touches.delete(e.pointerId);spin=null};
  canvas.addEventListener('pointerdown',touchDown);canvas.addEventListener('pointermove',touchMove);canvas.addEventListener('pointerup',touchUp);canvas.addEventListener('pointercancel',touchUp);
- canvas.addEventListener('wheel',e=>{if(e.cancelable)e.preventDefault();targetZoom=clamp(targetZoom+Math.sign(e.deltaY)*.35,9.5,15.0)},{passive:false});
- function draw(t){if(!active)return;raf=requestAnimationFrame(draw);if(t-last<29)return;last=t;resize();anim=t*.001;angle+=(targetAngle-angle)*.12;zoom+=(targetZoom-zoom)*.10;
+ canvas.addEventListener('wheel',e=>{if(e.cancelable)e.preventDefault();targetZoom=clamp(targetZoom+Math.sign(e.deltaY)*.35,10.5,15.6)},{passive:false});
+ function draw(t){if(!active)return;raf=requestAnimationFrame(draw);if(t-last<34)return;last=t;resize();anim=t*.001;angle+=(targetAngle-angle)*.12;zoom+=(targetZoom-zoom)*.10;
  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
  let aspect=canvas.width/canvas.height,P=perspective(.82,aspect,.1,90),eye=[Math.sin(angle)*zoom,3.22+Math.sin(angle*.3)*.2,Math.cos(angle)*zoom],Vw=lookAt(eye,[0,3.36,0]);let pulse=Math.sin(anim*.70)*.005;
  gl.useProgram(p);gl.uniformMatrix4fv(uni.P,false,new Float32Array(P));gl.uniformMatrix4fv(uni.V,false,new Float32Array(Vw));gl.uniform1f(uni.time,anim);
- const tint=colors[mode]||colors.storm;
- for(const n of nodes){let breath=n.motion==='chest'?pulse:n.motion==='head'?pulse*.3:0,pos=n.position.slice(),s=n.scale.slice();if(n.motion==='head'){pos[0]+=Math.sin(anim*.34)*.016;pos[1]+=Math.sin(anim*.78)*.009}
+ const tint=gear.aura==='cosmic'?[.72,.26,1]:gear.aura==='mint'?[.16,1,.73]:gear.aura==='pulse'?[1,.77,.33]:gear.aura==='shock'?[.3,.72,1]:accent==='pink'?[1,.45,.7]:accent==='amber'?[1,.65,.32]:accent==='teal'?[.2,1,.83]:accent==='lime'?[.65,1,.4]:colors[mode]||colors.storm;
+ for(const n of nodes){if(n.name?.startsWith('gear-')){const eq=n.name.substring(5);if(eq!==gear.head&&eq!==gear.outfit)continue}let breath=n.motion==='chest'?pulse:n.motion==='head'?pulse*.3:0,pos=n.position.slice(),s=n.scale.slice();const pump=(n.region&&pumps[n.region])||0;if(pump&&n.region!=='traps'){const boost=1+.07*Math.min(1,pump);s=s.map(v=>v*boost)}if(n.motion==='head'){pos[0]+=Math.sin(anim*.34)*.016;pos[1]+=Math.sin(anim*.78)*.009}
  let mat;if(n.axis){const [a,b,r]=n.axis;mat=yAxisTransform(a,b,r,r)}else mat=mm(mm(mm(mm(trans(...pos),rz(n.rz)),ry(n.ry)),rx(n.rx)),scale(...s));
  gl.uniformMatrix4fv(uni.M,false,new Float32Array(mat));let color=PALETTES[character]?.[n.material]||MATERIALS[n.material]||MATERIALS.skin;
  gl.uniform3fv(uni.color,new Float32Array(color));let z=zones[n.region],days=z?.days;const hot=z?.status==='hot'?1:z?.status==='warm'?.48:0,cold=z?.status==='cold'?1:0;
- const pump=n.region&&pumps[n.region];let pvalue=pump? .32:0;let glow= n.glow||0;let gColor=n.material==='gem'||n.material==='ice'?tint:[0,0,0];
+ let pvalue=pump? Math.min(1,pump)*.42:0;let glow= n.glow||0;let gColor=n.material==='gem'||n.material==='ice'?tint:[0,0,0];
  gl.uniform3fv(uni.glow,new Float32Array(mul(gColor,glow*.4)));gl.uniform1f(uni.metal,n.metal);gl.uniform1f(uni.fur,n.fur);gl.uniform1f(uni.hot,hot*.65+pvalue);gl.uniform1f(uni.cold,cold*.8);gl.uniform1f(uni.breath,breath);
  gl.bindVertexArray(n.geometry.vao);gl.drawElements(gl.TRIANGLES,n.geometry.count,gl.UNSIGNED_SHORT,0);
  }
@@ -284,12 +309,14 @@ function init(canvas){let gl=canvas.getContext('webgl2',{antialias:true,alpha:tr
  }
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');let stop=null;
  function setMode(next){mode=['storm','tide','ember'].includes(next)?next:'storm'}
- function setCharacter(next){const v=['bruiser','shell','kaiju'].includes(next)?next:'bruiser';if(!models[v])models[v]=bodyNodes(gl,lib,v);character=v;nodes=models[v];mode={bruiser:'storm',shell:'tide',kaiju:'ember'}[v];canvas.dataset.character=v;targetAngle=-.12;angle=-.12;}
+ function setCharacter(next){const v=['bruiser','shell','kaiju'].includes(next)?next:'bruiser';if(v===character){canvas.dataset.character=v;return}if(!models[v])models[v]=bodyNodes(gl,lib,v);character=v;nodes=models[v];mode={bruiser:'storm',shell:'tide',kaiju:'ember'}[v];canvas.dataset.character=v;targetAngle=-.12;angle=-.12;}
  function setZones(next,ps){zones=next||{};pumps=ps||{}}
- function reset(){targetAngle=-.12;targetZoom=11.55}
+ function setGear(next){gear={...gear,...(next||{})}}
+ function setAccent(next){accent=next||'default'}
+ function reset(){targetAngle=-.12;targetZoom=12.15}
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf)}else if(active){raf=requestAnimationFrame(draw)}});
  raf=requestAnimationFrame(draw);
- return{setMode,setCharacter,setZones,reset,getRenderer:()=> webgl2?'WebGL2':'WebGL1',dispose(){active=false;cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',touchDown);canvas.removeEventListener('pointermove',touchMove);canvas.removeEventListener('pointerup',touchUp);canvas.removeEventListener('pointercancel',touchUp)}}
+ return{setMode,setCharacter,setGear,setAccent,setZones,reset,getRenderer:()=> webgl2?'WebGL2':'WebGL1',dispose(){active=false;cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',touchDown);canvas.removeEventListener('pointermove',touchMove);canvas.removeEventListener('pointerup',touchUp);canvas.removeEventListener('pointercancel',touchUp)}}
 }
 root.PQ3D={create:init};
 })(window);

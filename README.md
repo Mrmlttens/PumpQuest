@@ -1,76 +1,68 @@
-# PumpQuest v0.5 — 3D Champions / seven-day test build
-
-**Test this build for seven days on the same phone and browser.**
-
-Changes since v0.4:
-- Three selectable, **distinct** 3D characters instead of one bull with three aura colors:
-  - **Stormhorn** — horned titan, leather/steel, blue sparks and mountain smoke.
-  - **Abyss Warden** — armored turtle-like fighter with a full rear shell, teal water glow and pylon fins.
-  - **Cinder Drake** — reptilian kaiju with a tapering tail, dorsal plates, talons and ember particles.
-- Full-screen 3D artwork remains visible behind the workout sheets. Tap the three small character selectors to switch immediately; drag to rotate, pinch to zoom.
-- Selection is saved in the existing `pumpquest.save.v1` localStorage record; **all previous workouts, XP, routines and exercise customizations remain unchanged**.
-- Roster also appears under Customize/Champions with descriptive cards. All three are available during this test.
-- Workout logging, the 19-region anatomy map, 14+ day cold spots, data export, timer and XP engine are preserved.
-
-## Important test checklist
-
-1. Select each champion and rotate it to inspect the front and back.
-2. Close and reopen the site: your champion should still be selected.
-3. Start a routine, log at least one weighted set, finish and check for XP.
-4. Open Body Map after the session to confirm recently trained muscles light up.
-5. Use **Settings → Export JSON** at least once during the week to keep your test data safe.
-6. Report any missing taps, glitches, slow rotation, exercise search failures or lost workout history.
-
-**No cloud sync:** all workouts and character settings are stored locally on the same browser. Data may be lost if site storage is cleared.
-
-**Design status:** these are original low-poly/procedural real-time models, not final sculpted high-detail glTF assets; they are intentionally lightweight for Android. No paid libraries, subscriptions, or copyrighted character models.
-
----
-
-# PumpQuest 3D — interactive prototype v0.4
+# PumpQuest — Champion Edition 1.0
 
 **Train in real life. See it on your character.**
 
-This version is a functioning Android-first workout RPG prototype with a real-time **WebGL 3D** fantasy titan. It is NOT a static image in a rotating frame. The titan is assembled from procedural 3D geometry with real camera perspective, lights, body meshes and depth, subtle breathing, rotatable 3D orbit controls and particle effects.
+A free, offline-first workout tracker with a full-screen, touch-rotatable fantasy champion. Built for Android. No account, advertising, subscriptions or external analytics.
+
+## What works
+
+- Three original interactive WebGL 3D champions: **Stormhorn** (storm titan), **Abyss Warden** (turtle tank), **Cinder Drake** (kaiju); switch without losing progress.
+- Low-motion breathing, eye glows and character-specific elemental particles; drag to rotate, pinch to zoom. Low-power rendering and reduced-motion support. A cinematic static fallback appears on devices without WebGL.
+- Actual 3D equipment: level-unlocked wrist wraps, gold gloves, shades and iron crown appear on the active model. Aura cosmetics adjust elemental color.
+- 80 bundled searchable exercises plus unlimited custom movements; Push, Pull, Legs, Upper starter split; create/edit/reorder routines with rep ranges and rest durations.
+- Active workouts with per-set weight, reps, set types (working, warm-up, dropset, failure), notes, rest countdown and autosave; previous-set reference, easy add/remove, restart/repeat completed session.
+- 19-region front/back anatomy map: recent muscle activity (0–1d hot, 2–6d warm, 7–13d neutral, **14+ days cold**, never-trained untracked). 3D anatomical highlights and temporary 24h pump effect, including slight muscle fullness and glow. **This is activity tracking, not a recovery diagnosis.**
+- XP/level rewards, earned gear, current streak and session-complete reveal.
+- Progress view: recent sessions, sets and volume, 7-day chart, estimated 1RM, workout details and the editable weekly goal.
+- **Hevy workout-history CSV import**: preserves existing PumpQuest logs, recognizes common exercise names, creates custom exercises for unknown names, handles kg/lb and duplicate sessions. Imported records do not award XP.
+- JSON save/restore, CSV export, history deletion, real weight unit conversions.
+- Offline PWA install via Chrome, plus Android WebView app build (APK from GitHub Actions). Saved data stays on the device/browser; import/exports are user-initiated.
 
 ## Play
 
-**Direct live preview:** https://mrmlttens.github.io/the-oddsfathers/pumpquest/
+- Live preview (hosted under an isolated folder on an existing working Pages site): **https://mrmlttens.github.io/the-oddsfathers/pumpquest/**
+- Open `index.html` via a local HTTPS/HTTP server or GitHub Pages, or use the self-contained `PumpQuest-PLAY-Release.html` backup.
+- Android debug APK: open **Actions → Android APK build → successful run → PumpQuest-Android-debug**, download and install the APK. It is for sideload testing, not a signed Play Store release.
 
-For now the preview lives in a **separate `/pumpquest/` folder** on an existing working GitHub Pages site, because GitHub Pages setup for the independent PumpQuest repository failed. Its source stays here in `Mrmlttens/PumpQuest`. The Oddsfathers' app files are not altered.
+## Hevy migration
 
-Open on Android using Chrome. Drag the *center of the character* left/right to rotate, pinch to zoom. The surrounding circular buttons open workout tools as slide-up panels, leaving the hero behind them. If WebGL is not supported, the app remains usable with a static image fallback.
+In Hevy: Profile → Settings → Export & Import Data → Export Data → Export Workouts. Open PumpQuest → Settings → Import Hevy History, select `workout_data.csv`, review the confirmation and import. Only the workout history imports; your Hevy routines must be built in PumpQuest. Export PumpQuest JSON before importing a large file.
 
-## Version 0.4
+## Reliability and data
 
-- Single-screen, full-height 3D hero with six floating circular commands.
-- Actual WebGL2/WebGL1 original horned titan. No paid APIs, CDN libraries, or external model downloads.
-- 3D orbit and pinch zoom, subtle breathing, small moving particles.
-- Storm, Tide, Ember color variations for particles and eyes; only one 3D creature body so far (not three unique 3D character models).
-- Real training logic: search 80 exercises, build/edit splits, rest timers, log sets/reps/weights, save workout history and earn XP.
-- Muscle activation highlights on 3D model plus a separate interactive front/back body map with **19 regions**.
-- Recency statuses: hot 0–1 days, warm 2–6, neutral 7–13, cold 14+; **untracked is not cold**. This is a visual training-frequency indicator, not a medical recovery assessment.
-- Session summary, level progression, aura unlocks, JSON backup and CSV export.
-- Existing `pumpquest.save.v1` data schema remains supported; hosted origin remains the same as v0.3.
+- Data key `pumpquest.save.v1` is retained for compatibility with earlier builds.
+- **Critical:** Browser storage is not cloud synced, and clearing browser data may delete workouts. Use **Settings → Export JSON** regularly. The installable Android build uses a separate local storage location from the web preview; move history between them by exporting/importing JSON.
+- No user tracking or remote services. Android build denies WebView navigation outside the local asset origin. The only input from outside is user-selected import files.
+- The app supports a full workout workflow but is not yet a signed Play Store app or independently audited production release. Browser/Android GPU capabilities and real-device visual performance vary. Android APK CI provides a compile check, not a substitute for device QA.
 
-## Build and tests
-
-No compilation, account, payment, login, or server needed. This is a static HTML/JS app.
+## Tests
 
 ```bash
 node tests/smoke.js
 node tests/anatomy.js
-python3 -m http.server 8000
+node tests/characters.js
+node tests/importer.js
 ```
 
-Then open http://localhost:8000/ in a browser with WebGL enabled. Static files can be hosted anywhere HTTPS is supported.
+GitHub Actions runs all tests. The Android workflow builds a sideloadable debug APK on supported pushes.
 
-Main files: `index.html`, `styles.css`, `scene3d.js` (WebGL model), `app.js` (workout system), `anatomy.js`, `data.js`, `sw.js`, and `assets/` fallback artwork and icons.
+## Code map
 
-## Limitations
+- `scene3d.js` — original low-dependency WebGL2/WebGL1 scene and touch camera
+- `app.js` — single-screen UI, workout ledger, routine editor, XP, lockers and save/export
+- `data.js` — exercise library, routines, cosmetic inventory
+- `anatomy.js` — training recency across 19 muscle zones
+- `insights.js` — workout-volume analytics, estimated 1RM and recent trends
+- `importer.js` — local CSV parser and Hevy migrator
+- `styles.css` — cinematic styling, animation and Android sizing
+- `manifest.webmanifest` / `sw.js` — offline installability
+- `android/` — native Java WebView wrapper and Android Gradle project
+- `.github/workflows/` — tests and Android APK build
 
-This is a **functional prototype**, not a production game or native Play Store Android application. The procedural 3D sculpt is deliberately lower-detail than the cinematic concept art. Cosmetic gear is tracked but not yet an independently modeled and physically wearable 3D equipment system. Workout data is stored in this browser's `localStorage` and does not sync across phones. Back it up with **Backup (JSON)** and keep the file safe; clearing site data can delete your logs.
+## Artistic direction
+
+A mobile-friendly **original fantasy character RPG**, not a copy of existing cartoon or game characters. The models remain optimized procedural geometry rather than custom sculpted photorealistic assets. Cinematic compositing, materials and individual model variation are a deliberate improvement, but fully sculpted and rigged character art remains a separate specialist production milestone.
 
 ## License
 
-MIT. Original code and original 3D geometry. No copyrighted external creature models embedded.
+MIT — original source code and art; no third-party characters/models bundled.
