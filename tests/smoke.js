@@ -5,7 +5,7 @@ const elements=new Map();
 function element(id){if(!elements.has(id))elements.set(id,{innerHTML:'',classList:{add(){},remove(){}},value:'',style:{},addEventListener(){},append(){},remove(){}});return elements.get(id)}
 const listeners={};
 const store=new Map();
-const context={console,Date,Math,JSON,Number,String,Array,Map,Set,Promise,setInterval:()=>{},setTimeout:()=>0,clearTimeout:()=>{},structuredClone,location:{protocol:'file:'},navigator:{},window:{scrollTo(){}},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{querySelector:s=>element(s),body:{classList:{add(){},remove(){},toggle(){}}},getElementById:()=>element('pq3d-canvas'),addEventListener:(name,fn)=>listeners[name]=fn},};
+const context={console,Date,Math,JSON,Number,String,Array,Map,Set,Promise,setInterval:()=>{},setTimeout:()=>0,clearTimeout:()=>{},structuredClone,location:{protocol:'file:'},navigator:{},window:{scrollTo(){}},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{querySelector:s=>element(s),body:{classList:{add(){},remove(){},toggle(){},contains(){return false}}},getElementById:()=>element('pq3d-canvas'),addEventListener:(name,fn)=>listeners[name]=fn},};
 context.window.window=context.window;
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(root,'data.js'),'utf8'),context);
@@ -14,7 +14,7 @@ vm.runInContext(fs.readFileSync(path.join(root,'app.js'),'utf8'),context);
 const click=(action,dataset={})=>{const target={dataset:{action,...dataset},closest:()=>target};listeners.click({target,preventDefault(){}})};
 const input=(field,index,set,value)=>listeners.input({target:{dataset:{input:field,index:String(index),set:String(set)},value:String(value)}});
 assert(element('#app').innerHTML.includes('pq-home'),'Full-screen hero home rendered');
-assert(element('#app').innerHTML.includes('STORM TITAN'),'3D character mode shown');
+assert(element('#app').innerHTML.includes('STORMHORN'),'3D character mode shown');
 click('startRoutine',{id:'push'});
 assert(element('#app').innerHTML.includes('WORKOUT IN PROGRESS'),'Can start a saved routine');
 input('weight',0,0,135);input('reps',0,0,10);
@@ -34,5 +34,13 @@ assert(element('#app').innerHTML.includes('Body map'),'Anatomy body map rendered
 click('anatomySide',{side:'back'});
 assert(element('#app').innerHTML.includes('BACK</button>'),'Anatomy view toggles');
 click('nav',{view:'locker'});
-assert(element('#app').innerHTML.includes('Living aura'),'Character effect selection available');
+assert(element('#app').innerHTML.includes('Choose a 3D champion'),'Three character selection available');
+click('species',{species:'shell'});
+assert(JSON.parse(store.get('pumpquest.save.v1')).profile.species==='shell','Turtle character persisted');
+click('species',{species:'kaiju'});
+assert(JSON.parse(store.get('pumpquest.save.v1')).profile.species==='kaiju','Kaiju character persisted');
+click('goHome');
+assert(element('#app').innerHTML.includes('CINDER DRAKE'),'Home label switches to selected champion');
+assert(JSON.parse(store.get('pumpquest.save.v1')).workouts.length===1,'Switching champion preserves logged workouts');
+
 console.log('PASS: home, avatar, routine start, set logging, XP, completion, pump, history, locker');

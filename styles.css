@@ -110,3 +110,26 @@ body.pq-panel-open #pq3d-world{filter:brightness(.49)}
 .pq-drawer .bottom-tools{bottom:0}
 .pq-webgl-fallback .pq-rotate-tip{font-size:0!important}
 .pq-webgl-fallback .pq-rotate-tip:after{content:'3D UNAVAILABLE • TRY CHROME WITH HARDWARE GRAPHICS';font-size:8px}
+
+/* v0.5: Three genuinely different selectable 3D champions. Keep the full-screen art first. */
+body:has(.pq-champion-carousel) #pq3d-world{transition:background .45s ease}
+body:has(.pq-champion-choice[data-species="shell"].is-selected) #pq3d-world{background:radial-gradient(ellipse at 48% 34%,#237f86 0%,#164555 32%,#0a2234 60%,#040d1a 100%)}
+body:has(.pq-champion-choice[data-species="kaiju"].is-selected) #pq3d-world{background:radial-gradient(ellipse at 50% 39%,#6c4036 0%,#3d222b 31%,#211826 63%,#090d18 100%)}
+.pq-champion-carousel{position:fixed;left:50%;bottom:174px;transform:translateX(-50%);z-index:10;display:flex;align-items:center;justify-content:center;gap:7px;width:min(93vw,415px);pointer-events:auto}
+.pq-champion-choice{flex:1;min-width:0;border:1px solid #7e9bb25c;border-radius:13px;background:linear-gradient(155deg,#0e2036d9,#071525e8);color:#b8cfe5;backdrop-filter:blur(7px);padding:7px 3px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 3px 12px #0007;cursor:pointer;transition:transform .18s,border .18s,background .18s;touch-action:manipulation}
+.pq-champion-choice:active{transform:scale(.95)}
+.pq-champion-choice.is-selected{border:1px solid #f1d39b;background:linear-gradient(165deg,#2b4054ea,#152335ea);box-shadow:0 0 15px #e4cb8950,inset 0 0 12px #e5b55e12;color:#fff8e7}
+.pq-choice-icon{font-size:16px;line-height:1}
+.pq-choice-name{font-size:8px;font-weight:950;letter-spacing:.05em;white-space:nowrap;line-height:1.15;text-align:center}
+.pq-champion-carousel+.pq-status-line{display:none}
+.champion-roster{display:grid;gap:9px}
+.roster-card{display:flex;align-items:center;gap:11px;width:100%;padding:10px;text-align:left;border:1px solid #647c9073;background:#132335;border-radius:12px;color:#dbe8f1;cursor:pointer}
+.roster-card.selected{border-color:#f1d194;background:linear-gradient(90deg,#253c50,#172738);box-shadow:inset 0 0 15px #6da5ca16}
+.roster-crest{display:grid;place-items:center;width:51px;height:51px;flex:none;border-radius:11px;background:radial-gradient(circle at 40% 35%,#4b8cb7,#1a2d4e 70%);color:#e4f9ff;font-size:23px;text-shadow:0 0 16px currentColor}
+.roster-shell{background:radial-gradient(circle at 40% 35%,#3baca6,#103e4c 70%)}.roster-kaiju{background:radial-gradient(circle at 40% 35%,#b65b3c,#42272d 70%)}
+.roster-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.roster-copy strong{font-size:12px;letter-spacing:.04em}.roster-copy small{color:#acbbc7;font-size:10px;line-height:1.4}
+.roster-check{color:#e5cc9d;font-size:9px;font-weight:900;white-space:nowrap}
+@media(max-height:700px){.pq-champion-carousel{bottom:150px}.pq-champion-choice{padding:5px 2px}.pq-choice-name{font-size:7px}}
+@media(prefers-reduced-motion:reduce){.pq-champion-choice,#pq3d-world{transition:none!important}}
+
+.pq-build-mark{color:#91b4c9;font-weight:650;letter-spacing:.08em}

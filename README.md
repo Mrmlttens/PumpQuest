@@ -1,3 +1,32 @@
+# PumpQuest v0.5 — 3D Champions / seven-day test build
+
+**Test this build for seven days on the same phone and browser.**
+
+Changes since v0.4:
+- Three selectable, **distinct** 3D characters instead of one bull with three aura colors:
+  - **Stormhorn** — horned titan, leather/steel, blue sparks and mountain smoke.
+  - **Abyss Warden** — armored turtle-like fighter with a full rear shell, teal water glow and pylon fins.
+  - **Cinder Drake** — reptilian kaiju with a tapering tail, dorsal plates, talons and ember particles.
+- Full-screen 3D artwork remains visible behind the workout sheets. Tap the three small character selectors to switch immediately; drag to rotate, pinch to zoom.
+- Selection is saved in the existing `pumpquest.save.v1` localStorage record; **all previous workouts, XP, routines and exercise customizations remain unchanged**.
+- Roster also appears under Customize/Champions with descriptive cards. All three are available during this test.
+- Workout logging, the 19-region anatomy map, 14+ day cold spots, data export, timer and XP engine are preserved.
+
+## Important test checklist
+
+1. Select each champion and rotate it to inspect the front and back.
+2. Close and reopen the site: your champion should still be selected.
+3. Start a routine, log at least one weighted set, finish and check for XP.
+4. Open Body Map after the session to confirm recently trained muscles light up.
+5. Use **Settings → Export JSON** at least once during the week to keep your test data safe.
+6. Report any missing taps, glitches, slow rotation, exercise search failures or lost workout history.
+
+**No cloud sync:** all workouts and character settings are stored locally on the same browser. Data may be lost if site storage is cleared.
+
+**Design status:** these are original low-poly/procedural real-time models, not final sculpted high-detail glTF assets; they are intentionally lightweight for Android. No paid libraries, subscriptions, or copyrighted character models.
+
+---
+
 # PumpQuest 3D — interactive prototype v0.4
 
 **Train in real life. See it on your character.**

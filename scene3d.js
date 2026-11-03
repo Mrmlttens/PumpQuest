@@ -1,4 +1,4 @@
-/* PumpQuest 3D — original procedural WebGL character, no CDN or paid model required.
+/* PumpQuest v0.5 — three distinct original procedural WebGL characters, no CDN required.
    This is actual perspective 3D geometry with orbit/pinch controls, not a static illustration. */
 (function(root){
 'use strict';
@@ -30,7 +30,12 @@ for(let i=0;i<segments;i++){let j=2+2*i;tri(g,j,j+1,j+2);tri(g,j+1,j+3,j+2);tri(
 function octa(){let g=geo(),p=[[0,1,0],[1,0,0],[0,0,1],[-1,0,0],[0,0,-1],[0,-1,0]];for(let q of [[0,2,1],[0,3,2],[0,4,3],[0,1,4],[5,1,2],[5,2,3],[5,3,4],[5,4,1]]){const a=p[q[0]],b=p[q[1]],c=p[q[2]],n=norm(cross(sub(b,a),sub(c,a))),v=q.map(k=>vertex(g,p[k],n));tri(g,...v)}return g}
 function tube(points,radii,segments=12){const g=geo();for(let j=0;j<points.length;j++){const tangent=norm(sub(points[Math.min(j+1,points.length-1)],points[Math.max(0,j-1)]));let side=norm(cross(Math.abs(tangent[1])>.88?[1,0,0]:[0,1,0],tangent)),bit=norm(cross(tangent,side));for(let i=0;i<=segments;i++){let t=2*PI*i/segments,n=norm(add(mul(side,Math.cos(t)),mul(bit,Math.sin(t))));vertex(g,add(points[j],mul(n,radii[j])),n)}}for(let j=0;j<points.length-1;j++)for(let i=0;i<segments;i++){let a=j*(segments+1)+i,b=a+segments+1;tri(g,a,a+1,b);tri(g,b,a+1,b+1)}return g}
 function yAxisTransform(a,b,r1,r2){const dir=sub(b,a),dy=Math.hypot(...dir);let y=norm(dir),x=norm(cross(Math.abs(y[2])>.92?[0,1,0]:[0,0,1],y)),z=cross(x,y);return [x[0]*r1,x[1]*r1,x[2]*r1,0,y[0]*dy,y[1]*dy,y[2]*dy,0,z[0]*r2,z[1]*r2,z[2]*r2,0,...a,1]}
-const MATERIALS={skin:[.36,.225,.155],skinLight:[.48,.31,.22],muzzle:[.31,.25,.21],dark:[.10,.12,.15],nose:[.19,.15,.14],fur:[.74,.69,.60],furDark:[.47,.43,.39],iron:[.30,.37,.42],steel:[.46,.53,.57],gold:[.73,.51,.24],goldBright:[.92,.71,.36],leather:[.23,.17,.13],brown:[.34,.23,.16],horn:[.51,.36,.25],tip:[.88,.75,.55],rock:[.16,.23,.32],gem:[.18,.71,1.0],ice:[.48,.83,1.0],black:[.08,.08,.09]};
+const MATERIALS={skin:[.36,.225,.155],skinLight:[.48,.31,.22],muzzle:[.31,.25,.21],dark:[.10,.12,.15],nose:[.19,.15,.14],fur:[.74,.69,.60],furDark:[.47,.43,.39],iron:[.30,.37,.42],steel:[.46,.53,.57],gold:[.73,.51,.24],goldBright:[.92,.71,.36],leather:[.23,.17,.13],brown:[.34,.23,.16],horn:[.51,.36,.25],tip:[.88,.75,.55],rock:[.16,.23,.32],gem:[.18,.71,1.0],ice:[.48,.83,1.0],black:[.08,.08,.09],shell:[.07,.30,.33],shellPlate:[.19,.54,.50],ridge:[.14,.45,.46],lava:[.95,.22,.08],tooth:[.88,.80,.62],scale:[.22,.32,.32]};
+const PALETTES={
+ bruiser:{},
+ shell:{skin:[.12,.40,.40],skinLight:[.26,.60,.55],muzzle:[.12,.39,.40],fur:[.25,.62,.59],furDark:[.07,.31,.34],iron:[.21,.46,.52],steel:[.39,.70,.69],gold:[.61,.54,.34],goldBright:[.81,.74,.43],leather:[.10,.28,.34],brown:[.24,.53,.51],horn:[.30,.73,.73],tip:[.64,.98,.90],nose:[.10,.25,.29],gem:[.20,.95,.87],ice:[.42,1,.90]},
+ kaiju:{skin:[.21,.27,.31],skinLight:[.29,.37,.39],muzzle:[.17,.23,.27],fur:[.32,.38,.41],furDark:[.10,.15,.19],iron:[.30,.33,.38],steel:[.43,.48,.51],gold:[.64,.32,.17],goldBright:[.93,.45,.16],leather:[.17,.16,.18],brown:[.22,.22,.23],horn:[.30,.28,.28],tip:[.60,.51,.46],nose:[.09,.13,.16],gem:[1,.35,.10],ice:[1,.57,.19],ridge:[.44,.18,.15],scale:[.17,.22,.26]}
+};
 const VS=`#version 300 es
 precision highp float;
 layout(location=0) in vec3 aPos; layout(location=1) in vec3 aNormal;
@@ -56,7 +61,7 @@ frag=vec4(pow(max(color,vec3(0.)),vec3(.91)),1.0);
 const PVS=`#version 300 es
 precision highp float;
 layout(location=0) in vec3 aPos;layout(location=2) in vec4 aSeed;uniform mat4 uV,uP;uniform float uTime,uKind;out float vAlpha;out float vSeed;
-void main(){float t=mod(uTime*(.14+aSeed.w*.10)+aSeed.x*17.,6.7)/6.7;vec3 p=aPos;p.y+=t*7.6;p.x+=sin(t*5.+aSeed.x*21.)*.26*aSeed.y;p.z+=cos(t*7.+aSeed.z*19.)*.14;gl_Position=uP*uV*vec4(p,1.);gl_PointSize=mix(3.2,8.2,aSeed.y)*(1.-t*.6);vAlpha=sin(t*3.14159)*.7;vSeed=aSeed.z;}`;
+void main(){float t=mod(uTime*(.14+aSeed.w*.10)+aSeed.x*17.,6.7)/6.7;vec3 p=aPos;p.y+=t*(uKind>1.5?8.4:uKind>.5?5.1:7.3);p.x+=sin(t*(uKind>.5?8.:5.)+aSeed.x*21.)*(uKind>.5?.41:.23)*aSeed.y;p.z+=cos(t*7.+aSeed.z*19.)*.14;gl_Position=uP*uV*vec4(p,1.);gl_PointSize=mix(uKind>.5&&uKind<1.5?4.5:2.9,8.0,aSeed.y)*(1.-t*.6);vAlpha=sin(t*3.14159)*.7;vSeed=aSeed.z;}`;
 const PFS=`#version 300 es
 precision highp float;
 in float vAlpha,vSeed;out vec4 frag;uniform vec3 uTint;uniform float uKind;
@@ -64,7 +69,7 @@ void main(){vec2 p=gl_PointCoord*2.-1.;float d=dot(p,p);if(d>1.)discard;float a=
 function shader(gl,v,f){const compile=(type,source)=>{const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s};let p=gl.createProgram(),a=compile(gl.VERTEX_SHADER,v),b=compile(gl.FRAGMENT_SHADER,f);gl.attachShader(p,a);gl.attachShader(p,b);gl.bindAttribLocation(p,0,'aPos');gl.bindAttribLocation(p,1,'aNormal');gl.bindAttribLocation(p,2,'aSeed');gl.linkProgram(p);gl.deleteShader(a);gl.deleteShader(b);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));return p}
 function gpuMesh(gl,g){const vao=gl.createVertexArray();gl.bindVertexArray(vao);const attrib=(data,slot,size)=>{let buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);gl.enableVertexAttribArray(slot);gl.vertexAttribPointer(slot,size,gl.FLOAT,false,0,0)};attrib(g.v,0,3);attrib(g.n,1,3);const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(g.i),gl.STATIC_DRAW);gl.bindVertexArray(null);return{vao,count:g.i.length}}
 function geometryLib(gl){return {ball:gpuMesh(gl,uvBall()),fur:gpuMesh(gl,coneMesh()),gem:gpuMesh(gl,octa()),rock:gpuMesh(gl,uvBall(17,22,.19,2.4))}}
-function bodyNodes(gl,lib){const nodes=[];const attach=(geometry,material,pos=[0,0,0],sz=[1,1,1],opts={})=>{nodes.push({geometry,material,position:pos,scale:sz,rz:opts.rz||0,rx:opts.rx||0,ry:opts.ry||0,region:opts.region||'',glow:opts.glow||0,metal:opts.metal||0,fur:opts.fur||0,motion:opts.motion||'',axis:opts.axis||null,name:opts.name||''});return nodes[nodes.length-1]};
+function bodyNodes(gl,lib,character='bruiser'){const nodes=[];const attach=(geometry,material,pos=[0,0,0],sz=[1,1,1],opts={})=>{nodes.push({geometry,material,position:pos,scale:sz,rz:opts.rz||0,rx:opts.rx||0,ry:opts.ry||0,region:opts.region||'',glow:opts.glow||0,metal:opts.metal||0,fur:opts.fur||0,motion:opts.motion||'',axis:opts.axis||null,name:opts.name||''});return nodes[nodes.length-1]};
 const ell=(m,p,s,o={})=>attach(lib.ball,m,p,s,o), fur=(a,b,r,m='fur',opts={})=>attach(lib.fur,m,a,[1,1,1],{...opts,axis:[a,b,r]}),stone=(p,s)=>attach(lib.rock,'rock',p,s,{metal:.2});
 const pipe=(pts,radii,mat='horn',opts={})=>attach(gpuMesh(gl,tube(pts,radii)) ,mat,[0,0,0],[1,1,1],opts);
 // Footing: layered rock instead of a flat stage.
@@ -91,11 +96,11 @@ for(let s of [-1,1]){
  for(let k=0;k<5;k++)fur([s*(.35+k*.115),2.53,.52],[s*(.35+k*.125),1.92-(k%2)*.18,.61],.072,k%2?'furDark':'fur',{fur:1});
 }
 // Core and ribcage, anatomically shaped groups rather than one sphere.
-ell('skin',[0,3.87,-.08],[1.11,1.24,.63],{region:'abs',motion:'chest'});
+ell('skin',[0,3.87,-.08],[1.04,1.23,.62],{region:'abs',motion:'chest'});
 ell('skinLight',[0,3.35,.40],[.74,.75,.23],{region:'abs',motion:'chest'});
 for(let s of [-1,1]){
- ell('skin',[s*.62,4.5,.39],[.72,.50,.45],{region:'upperChest',rz:s*.08,motion:'chest'});
- ell('skinLight',[s*.60,4.18,.51],[.65,.32,.35],{region:'lowerChest',motion:'chest'});
+ ell('skin',[s*.60,4.5,.37],[.70,.48,.43],{region:'upperChest',rz:s*.08,motion:'chest'});
+ ell('skinLight',[s*.60,4.19,.50],[.64,.32,.34],{region:'lowerChest',motion:'chest'});
  ell('skin',[s*.92,3.90,-.07],[.36,.85,.43],{region:'lats',rz:s*.2,motion:'chest'});
  ell('skinLight',[s*.77,3.36,.34],[.28,.65,.25],{region:'obliques',rz:s*.14,motion:'chest'});
  ell('skin',[s*.44,4.43,-.61],[.66,.51,.30],{region:'midBack',motion:'chest'});
@@ -130,42 +135,104 @@ ell('leather',[0,2.95,.22],[.93,.23,.58]);
 for(let k=-4;k<=4;k++)ell('gold',[k*.17,2.94,.76-Math.abs(k)*.025],[.064,.15,.052],{metal:.85});
 attach(lib.gem,'gold',[0,2.96,.83],[.26,.30,.12],{metal:.9});
 attach(lib.gem,'gem',[0,2.96,.96],[.13,.20,.09],{glow:.36,metal:.55});
-// Neck and wild mane; thick muscular head with broad muzzle.
-ell('skin',[0,5.12,0],[.49,.42,.46],{motion:'head'});
-ell('furDark',[0,5.23,-.34],[.75,.66,.62],{fur:1,motion:'head'});
-ell('skinLight',[0,5.54,.12],[.63,.61,.51],{motion:'head'});
-ell('muzzle',[0,5.30,.57],[.46,.29,.43],{motion:'head'});
-ell('nose',[0,5.26,.91],[.32,.13,.18],{motion:'head'});
-ell('black',[-.16,5.28,1.073],[.07,.036,.03],{motion:'head'});ell('black',[.16,5.28,1.073],[.07,.036,.03],{motion:'head'});
-ell('furDark',[0,5.10,.75],[.39,.14,.23],{motion:'head'});
-// Original glowing eyes + brow ridges.
-for(let s of [-1,1]){
- ell('brown',[s*.26,5.69,.52],[.31,.17,.18],{rz:-s*.25,motion:'head'});
- ell('dark',[s*.28,5.58,.55],[.17,.115,.09],{motion:'head'});
- ell('ice',[s*.28,5.60,.623],[.092,.065,.06],{glow:.75,motion:'head'});
- ell('gem',[s*.28,5.60,.68],[.042,.05,.025],{glow:1,motion:'head'});
- ell('skin',[s*.50,5.34,-.10],[.31,.19,.16],{rz:s*.1,motion:'head'});
- ell('nose',[s*.67,5.33,-.04],[.25,.17,.21],{motion:'head'});
-}
-// Crown of thick curling real three-dimensional horns.
-for(let s of [-1,1]){
- const pts=[[s*.44,5.85,-.02],[s*.72,6.12,-.12],[s*1.15,6.29,-.18],[s*1.65,6.37,-.22],[s*1.93,6.64,-.24],[s*1.93,6.97,-.26],[s*1.71,7.20,-.23],[s*1.47,7.23,-.21]];
- pipe(pts,[.32,.31,.28,.23,.18,.12,.06,.004],'horn',{motion:'head'});
-
-}
-// Furry brows, shoulders and flowing beard. Uses many unique tapered 3D locks.
-for(let s of [-1,1]){
- for(let k=0;k<12;k++){
-  const angle=(k/11)*PI*.9;let x=s*(.40+.28*Math.sin(angle)),y=5.78+.24*Math.cos(angle),z=.02-.30*Math.sin(k*.91);
-  fur([x,y,z],[x+s*(.05+.11*(k%3)),y+.15+(k%2)*.13,z-.06],.095,k%4?'fur':'furDark',{fur:1,motion:'head'});
+// Three separate, recognizable, fully rotatable original 3D heads and silhouettes.
+if(character==='bruiser'){
+ // Stormhorn: carved horn spirals, shaggy ice mane, detailed muzzle and glowing eyes.
+ ell('skin',[0,5.12,0],[.48,.42,.45],{motion:'head'});
+ ell('furDark',[0,5.27,-.32],[.69,.64,.60],{fur:1,motion:'head'});
+ ell('skinLight',[0,5.56,.10],[.60,.61,.49],{motion:'head'});
+ ell('muzzle',[0,5.27,.55],[.43,.27,.40],{motion:'head'});
+ ell('nose',[0,5.26,.88],[.31,.12,.17],{motion:'head'});
+ for(let s of [-1,1]){
+  ell('black',[s*.15,5.28,1.01],[.065,.035,.04],{motion:'head'});
+  ell('brown',[s*.27,5.68,.49],[.31,.17,.18],{rz:-s*.22,motion:'head'});
+  ell('dark',[s*.28,5.57,.54],[.17,.11,.09],{motion:'head'});
+  ell('ice',[s*.28,5.60,.62],[.09,.06,.06],{glow:.86,motion:'head'});
+  ell('furDark',[s*.51,5.34,-.09],[.30,.20,.17],{motion:'head'});
+  // Heavy bent horns deliberately narrower than v0.4 so neither gets clipped on mobile.
+  const pts=[[s*.44,5.88,-.05],[s*.66,6.15,-.10],[s*.99,6.32,-.17],[s*1.40,6.39,-.20],[s*1.65,6.66,-.21],[s*1.62,6.96,-.20],[s*1.43,7.08,-.17]];
+  pipe(pts,[.28,.29,.26,.22,.16,.09,.004],'horn',{motion:'head'});
+  // Engraved horn cuffs.
+  for(let j=0;j<3;j++)ell('gold',[s*(.72+j*.15),6.18+j*.05,-.04],[.06,.028,.11],{metal:.85,motion:'head'});
+  for(let k=0;k<11;k++){
+   const a=k/10*PI*.85,x=s*(.41+.24*Math.sin(a)),y=5.80+.22*Math.cos(a);
+   fur([x,y,-.1],[x+s*.09,y+.16+(k%3)*.08,-.20],.095,k%4?'fur':'furDark',{fur:1,motion:'head'});
+  }
+  for(let k=0;k<13;k++){
+   const x=s*(.09+k*.033),y=5.12-(k%4)*.035,z=.76-(k%3)*.028;
+   fur([x,y,z],[x+s*.035,4.49+(k%3)*.1,z+.06],.071,k%3?'fur':'furDark',{fur:1,motion:'head'});
+  }
  }
- for(let k=0;k<12;k++){let x=s*(.12+k*.044),y=5.18-(k%4)*.04,z=.78-(k%3)*.035;fur([x,y,z],[x+s*(k%3)*.06,4.49+(k%4)*.10,z+.03],.073,k%3?'fur':'furDark',{fur:1,motion:'head'});}
-}
-for(let i=0;i<7;i++)fur([-.16+i*.054,5.13,.87],[-.23+i*.07,4.40-(i%3)*.17,.85],.10,i%3?'fur':'furDark',{fur:1,motion:'head'});
-// Fur around waist and wild shoulder locks.
-for(let s of [-1,1])for(let k=0;k<15;k++){
- let a=k*PI*2/15,x=s*1.12+Math.cos(a)*.35,z=-.23+Math.sin(a)*.35;
- fur([x,4.55,z],[x+s*(.12+(k%3)*.04),4.06-(k%4)*.12,z],.075,k%2?'furDark':'fur',{fur:1});
+ for(let i=0;i<8;i++)fur([-.18+i*.051,5.13,.85],[-.23+i*.07,4.36-(i%3)*.12,.87],.084,i%3?'fur':'furDark',{fur:1,motion:'head'});
+ for(let s of [-1,1])for(let k=0;k<14;k++){
+  let a=k*PI*2/14,x=s*1.12+Math.cos(a)*.35,z=-.23+Math.sin(a)*.35;
+  fur([x,4.55,z],[x+s*.12,4.06-(k%4)*.10,z],.068,k%2?'furDark':'fur',{fur:1});
+ }
+}else if(character==='shell'){
+ // Abyss Warden: rounded tortoise face and an enormous segmented shell on the BACK.
+ ell('skin',[0,5.20,0],[.40,.43,.47],{motion:'head'});
+ ell('skinLight',[0,5.52,.15],[.70,.53,.56],{motion:'head'});
+ ell('muzzle',[0,5.31,.63],[.53,.20,.43],{motion:'head'});
+ ell('horn',[0,5.22,.85],[.31,.11,.23],{motion:'head'});
+ ell('dark',[0,5.16,1.04],[.33,.025,.045],{motion:'head'});
+ for(let s of [-1,1]){
+  ell('dark',[s*.33,5.61,.56],[.21,.16,.13],{motion:'head'});
+  ell('ice',[s*.33,5.62,.67],[.105,.09,.055],{glow:.86,motion:'head'});
+  ell('skin',[s*.62,5.42,-.08],[.31,.20,.25],{motion:'head'});
+  // Leaf-like cheek fins and ridges, distinct from a bull silhouette.
+  fur([s*.60,5.68,-.18],[s*.87,6.16,-.21],.16,'shellPlate',{motion:'head',metal:.35});
+  for(let i=0;i<3;i++)fur([s*(.15+i*.13),5.99,.04],[s*(.24+i*.14),6.19+(i%2)*.05,.02],.07,'ridge',{motion:'head'});
+ }
+ // Thick unmistakable domed shell, visible on rotation.
+ ell('dark',[0,3.94,-.76],[1.36,1.49,.66],{region:'lats'});
+ ell('shell',[0,3.96,-.97],[1.31,1.45,.64],{region:'midBack',metal:.2});
+ ell('shellPlate',[0,4.12,-1.55],[.56,.72,.17],{metal:.27});
+ for(let k=0;k<8;k++){
+  let a=2*PI*k/8;
+  ell(k%2?'shellPlate':'ridge',[Math.cos(a)*.92,3.95+Math.sin(a)*1.06,-1.34],[.37,.47,.18],{rz:-a,metal:.2});
+ }
+ for(let k=0;k<12;k++){
+  const a=k*PI*2/12;
+  ell('gold',[Math.cos(a)*1.29,3.95+Math.sin(a)*1.36,-.84],[.105,.15,.12],{metal:.85});
+ }
+ // Shoulder armor + twin original water-crystal pylons (not weapon cannons).
+ for(let s of [-1,1]){
+  ell('shell',[s*1.29,4.78,-.15],[.54,.30,.47],{metal:.30});
+  fur([s*1.24,4.82,-.34],[s*1.45,5.48,-.37],.20,'shellPlate',{metal:.4});
+  attach(lib.gem,'gem',[s*1.45,5.46,-.35],[.16,.33,.15],{glow:.55,metal:.3});
+  for(let j=0;j<3;j++)fur([s*(1.70+j*.06),2.08,.39],[s*(1.7+j*.06),1.85,.60],.10,'tooth');
+ }
+}else{
+ // Cinder Drake: reptilian snout, coral-like dorsal fins, talons and tapering tail.
+ ell('skin',[0,5.16,-.03],[.50,.41,.42],{motion:'head'});
+ ell('scale',[0,5.56,.10],[.60,.59,.59],{motion:'head'});
+ ell('skinLight',[0,5.30,.62],[.48,.24,.56],{motion:'head'});
+ ell('muzzle',[0,5.20,.88],[.42,.14,.43],{motion:'head'});
+ ell('dark',[0,5.145,.97],[.35,.028,.33],{motion:'head'});
+ for(let s of [-1,1]){
+  ell('dark',[s*.27,5.61,.56],[.20,.15,.12],{motion:'head'});
+  ell('lava',[s*.28,5.62,.66],[.09,.085,.05],{glow:1,motion:'head'});
+  ell('black',[s*.24,5.31,1.08],[.045,.029,.03],{motion:'head'});
+  ell('ridge',[s*.48,5.63,-.22],[.24,.19,.27],{motion:'head'});
+  for(let k=0;k<5;k++)fur([s*(.13+k*.09),5.12,.85],[s*(.13+k*.09),4.96,.88],.053,'tooth',{motion:'head'});
+  for(let k=0;k<3;k++)fur([s*(.32+k*.11),5.93,-.10],[s*(.39+k*.15),6.29+(k%2)*.09,-.16],.14,'ridge',{metal:.25,motion:'head'});
+ }
+ // Floating geometry of massive plated dorsal scales down the spine.
+ for(let k=0;k<7;k++){
+  let y=5.64-k*.47,sz=.38+k*.036;
+  attach(lib.gem,k%2?'ridge':'lava',[0,y,-.75],[sz,.53,.25],{rx:-.34,glow:k%2?.05:.15});
+  fur([0,y,-.70],[0,y+.66,-1.02],.22,'ridge');
+ }
+ pipe([[0,2.72,-.48],[0,2.48,-1.12],[0,2.05,-1.86],[.03,1.65,-2.40],[.10,1.40,-2.97],[.05,1.46,-3.42]], [.50,.44,.35,.26,.14,.012],'skin',{region:'glutes'});
+ for(let k=0;k<6;k++){
+   let z=-1.25-k*.34,y=2.38-k*.17;
+   fur([0,y,z],[0,y+.29+(5-k)*.07,z-.05],.13,'ridge');
+ }
+ for(let s of [-1,1]){
+  for(let j=0;j<3;j++)fur([s*(.56+j*.16),.22,.70],[s*(.56+j*.16),.18,1.02],.105,'tooth');
+  for(let j=0;j<3;j++)fur([s*(1.68+j*.12),2.05,.44],[s*(1.67+j*.12),1.78,.61],.095,'tooth');
+  fur([s*1.28,4.95,-.20],[s*1.48,5.45,-.16],.20,'ridge');
+ }
 }
 // Rune tattoos and stone shards on the 3D armor.
 for(let s of [-1,1]){
@@ -187,27 +254,27 @@ function init(canvas){let gl=canvas.getContext('webgl2',{antialias:true,alpha:tr
   else code=code.replace(/\bout\b/g,'varying');
   code=code.replace('transpose(inverse(mat3(uM)))','mat3(uM)');return code;
  };
- const p=shader(gl,upgrade(VS),upgrade(FS,true)),pp=shader(gl,upgrade(PVS),upgrade(PFS,true));let lib=geometryLib(gl),nodes=bodyNodes(gl,lib);
+ const p=shader(gl,upgrade(VS),upgrade(FS,true)),pp=shader(gl,upgrade(PVS),upgrade(PFS,true));let lib=geometryLib(gl),models={bruiser:bodyNodes(gl,lib,'bruiser')},character='bruiser',nodes=models.bruiser;
  const get=(prog,s)=>gl.getUniformLocation(prog,s),uni={P:get(p,'uP'),V:get(p,'uV'),M:get(p,'uM'),time:get(p,'uTime'),color:get(p,'uColor'),glow:get(p,'uGlow'),metal:get(p,'uMetal'),rough:get(p,'uRough'),hot:get(p,'uHot'),cold:get(p,'uCold'),fur:get(p,'uFur'),breath:get(p,'uBreath')};
  const pUni={P:get(pp,'uP'),V:get(pp,'uV'),time:get(pp,'uTime'),tint:get(pp,'uTint'),kind:get(pp,'uKind')};
  const pbuf=gl.createVertexArray();gl.bindVertexArray(pbuf);const pv=[],ps=[];for(let i=0;i<110;i++){let a=i*2.399963,rad=.5+(i%11)*.16;pv.push(Math.cos(a)*rad,.05+(i%9)*.46,Math.sin(a)*.9);ps.push((i*.75487766)%1,(i*.414213)%1,(i*.332718)%1,(i*.193)%1);}for(let [loc,arr,sz] of [[0,pv,3],[2,ps,4]]){let b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(arr),gl.STATIC_DRAW);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,sz,gl.FLOAT,false,0,0)}gl.bindVertexArray(null);
  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
- let angle=-.12,targetAngle=-.12,zoom=10.65,targetZoom=10.65,active=true,anim=0,last=0,raf=0,mode='storm',zones={},pumps={},focused=false,spin=null,touches=new Map(),lastPinch=0;
+ let angle=-.12,targetAngle=-.12,zoom=11.55,targetZoom=11.55,active=true,anim=0,last=0,raf=0,mode='storm',zones={},pumps={},focused=false,spin=null,touches=new Map(),lastPinch=0;
  const colors={storm:[.24,.72,1],tide:[.15,1,.82],ember:[1,.41,.18]};
  const resize=()=>{const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);let ratio=Math.min(devicePixelRatio||1,1.65),width=Math.floor(w*ratio),height=Math.floor(h*ratio);if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}gl.viewport(0,0,width,height)};
  const touchDown=e=>{if(e.target!==canvas)return;canvas.setPointerCapture(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===2){let pts=[...touches.values()];lastPinch=Math.hypot(pts[0][0]-pts[1][0],pts[0][1]-pts[1][1])}spin=e.clientX};
- const touchMove=e=>{if(!touches.has(e.pointerId))return;let prev=touches.get(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===1)targetAngle+=clamp((e.clientX-prev[0])*.011,-.22,.22);else if(touches.size===2){let pts=[...touches.values()],dist=Math.hypot(pts[0][0]-pts[1][0],pts[0][1]-pts[1][1]);targetZoom=clamp(targetZoom-(dist-lastPinch)*.015,8.8,13.8);lastPinch=dist}};
+ const touchMove=e=>{if(!touches.has(e.pointerId))return;let prev=touches.get(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===1)targetAngle+=clamp((e.clientX-prev[0])*.011,-.22,.22);else if(touches.size===2){let pts=[...touches.values()],dist=Math.hypot(pts[0][0]-pts[1][0],pts[0][1]-pts[1][1]);targetZoom=clamp(targetZoom-(dist-lastPinch)*.015,9.5,15.0);lastPinch=dist}};
  const touchUp=e=>{touches.delete(e.pointerId);spin=null};
  canvas.addEventListener('pointerdown',touchDown);canvas.addEventListener('pointermove',touchMove);canvas.addEventListener('pointerup',touchUp);canvas.addEventListener('pointercancel',touchUp);
- canvas.addEventListener('wheel',e=>{if(e.cancelable)e.preventDefault();targetZoom=clamp(targetZoom+Math.sign(e.deltaY)*.35,8.8,13.8)},{passive:false});
+ canvas.addEventListener('wheel',e=>{if(e.cancelable)e.preventDefault();targetZoom=clamp(targetZoom+Math.sign(e.deltaY)*.35,9.5,15.0)},{passive:false});
  function draw(t){if(!active)return;raf=requestAnimationFrame(draw);if(t-last<29)return;last=t;resize();anim=t*.001;angle+=(targetAngle-angle)*.12;zoom+=(targetZoom-zoom)*.10;
  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
- let aspect=canvas.width/canvas.height,P=perspective(.84,aspect,.1,90),eye=[Math.sin(angle)*zoom,3.22+Math.sin(angle*.3)*.2,Math.cos(angle)*zoom],Vw=lookAt(eye,[0,3.36,0]);let pulse=Math.sin(anim*.70)*.005;
+ let aspect=canvas.width/canvas.height,P=perspective(.82,aspect,.1,90),eye=[Math.sin(angle)*zoom,3.22+Math.sin(angle*.3)*.2,Math.cos(angle)*zoom],Vw=lookAt(eye,[0,3.36,0]);let pulse=Math.sin(anim*.70)*.005;
  gl.useProgram(p);gl.uniformMatrix4fv(uni.P,false,new Float32Array(P));gl.uniformMatrix4fv(uni.V,false,new Float32Array(Vw));gl.uniform1f(uni.time,anim);
  const tint=colors[mode]||colors.storm;
  for(const n of nodes){let breath=n.motion==='chest'?pulse:n.motion==='head'?pulse*.3:0,pos=n.position.slice(),s=n.scale.slice();if(n.motion==='head'){pos[0]+=Math.sin(anim*.34)*.016;pos[1]+=Math.sin(anim*.78)*.009}
  let mat;if(n.axis){const [a,b,r]=n.axis;mat=yAxisTransform(a,b,r,r)}else mat=mm(mm(mm(mm(trans(...pos),rz(n.rz)),ry(n.ry)),rx(n.rx)),scale(...s));
- gl.uniformMatrix4fv(uni.M,false,new Float32Array(mat));let color=MATERIALS[n.material]||MATERIALS.skin;
+ gl.uniformMatrix4fv(uni.M,false,new Float32Array(mat));let color=PALETTES[character]?.[n.material]||MATERIALS[n.material]||MATERIALS.skin;
  gl.uniform3fv(uni.color,new Float32Array(color));let z=zones[n.region],days=z?.days;const hot=z?.status==='hot'?1:z?.status==='warm'?.48:0,cold=z?.status==='cold'?1:0;
  const pump=n.region&&pumps[n.region];let pvalue=pump? .32:0;let glow= n.glow||0;let gColor=n.material==='gem'||n.material==='ice'?tint:[0,0,0];
  gl.uniform3fv(uni.glow,new Float32Array(mul(gColor,glow*.4)));gl.uniform1f(uni.metal,n.metal);gl.uniform1f(uni.fur,n.fur);gl.uniform1f(uni.hot,hot*.65+pvalue);gl.uniform1f(uni.cold,cold*.8);gl.uniform1f(uni.breath,breath);
@@ -217,11 +284,12 @@ function init(canvas){let gl=canvas.getContext('webgl2',{antialias:true,alpha:tr
  }
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');let stop=null;
  function setMode(next){mode=['storm','tide','ember'].includes(next)?next:'storm'}
+ function setCharacter(next){const v=['bruiser','shell','kaiju'].includes(next)?next:'bruiser';if(!models[v])models[v]=bodyNodes(gl,lib,v);character=v;nodes=models[v];mode={bruiser:'storm',shell:'tide',kaiju:'ember'}[v];canvas.dataset.character=v;targetAngle=-.12;angle=-.12;}
  function setZones(next,ps){zones=next||{};pumps=ps||{}}
- function reset(){targetAngle=-.12;targetZoom=10.65}
+ function reset(){targetAngle=-.12;targetZoom=11.55}
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf)}else if(active){raf=requestAnimationFrame(draw)}});
  raf=requestAnimationFrame(draw);
- return{setMode,setZones,reset,getRenderer:()=> webgl2?'WebGL2':'WebGL1',dispose(){active=false;cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',touchDown);canvas.removeEventListener('pointermove',touchMove);canvas.removeEventListener('pointerup',touchUp);canvas.removeEventListener('pointercancel',touchUp)}}
+ return{setMode,setCharacter,setZones,reset,getRenderer:()=> webgl2?'WebGL2':'WebGL1',dispose(){active=false;cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',touchDown);canvas.removeEventListener('pointermove',touchMove);canvas.removeEventListener('pointerup',touchUp);canvas.removeEventListener('pointercancel',touchUp)}}
 }
 root.PQ3D={create:init};
 })(window);
