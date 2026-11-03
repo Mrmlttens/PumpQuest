@@ -1,15 +1,13 @@
-# Release 1.0 — Champion Edition
+# PumpQuest 1.1 — 3D engine and materials pass
 
-- Stabilized single-screen 3D championship view with 3 selectable models and overlay tools.
-- Updated skin, metal, fur lighting and GPU shader noise; toned down clutter and camera framing.
-- Equipped earned gloves, wrist wraps, glasses and crown now materialize as 3D meshes.
-- 24h 3D muscle pump and 19-region cold/hot annotation.
-- Added working/warm-up/drop/failure set types, session notes, set removal, routine reorder, full weight-unit conversion.
-- Added working-set volume, per-exercise estimated 1RM, history details/repeat/delete, adjustable weekly target.
-- Added optional Hevy workout CSV migration with dedupe, kg/lb conversion and original dates.
-- Added install control, Android asset-app package, native file picker/save integration and CI debug APK build.
-- Preserves existing save format `pumpquest.save.v1`.
+## Verified
+- WebGL2 browser with software GPU: all three champions render with no shader compilation errors.
+- 7,070-vertex continuous anatomy sculpt, with real-time workout heat/cold color zones.
+- Filmic shader: skin, horn, fur, metallics, and leather surface details.
+- Three live species, selection, orbit and zoom; Cinematic/Balanced settings in app.
+- JavaScript tests: exercise/session/XP, 3D construction, 19-zone anatomy, import/export.
 
-## Before store launch
-
-Real Android device QA, signed Android App Bundle, app listing/store credentials, accessibility/device coverage, account/cloud sync strategy, data-protection review and specialized 3D asset production are still needed. This is a fully playable local-first release build, not a store-submitted commercial product.
+## Not yet complete
+- The creatures still lack artist-produced high-poly sculpts, baked normal maps, 2K PBR textures, facial rigs, and quality LODs. Do not market this as cinematic character fidelity. See ART_PIPELINE.md.
+- Need actual physical Android GPU/thermal/performance QA before production.
+- Debug APK signatures may rotate; backup before reinstalling.

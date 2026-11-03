@@ -1,3 +1,11 @@
+# PumpQuest — Cinematic Engine 1.1 preview
+
+This is a *visual-engine preview*, not a promise that its procedural characters now match the approved cinematic concept art. The art production gap is documented in `ART_PIPELINE.md`.
+
+**New in v1.1:** Continuous sculpted-body mesh (7,070 vertices / 14,136 triangles), filmic shading and procedural material detail, enhanced sky atmosphere, selectable Cinematic/Balanced rendering modes, 3D muscle hot/cold overlays, existing three selectable creatures, equipable 3D cosmetics, small idle movement, rest timers, saved splits, Hevy CSV import, and fully local data export.
+
+**Do not uninstall an existing debug APK before exporting a JSON backup.** APK debug builds from different GitHub Actions runners may be signed with different keys, so an upgrade can require uninstalling the existing app and restoring exported data. For art reviews, use the web build instead of changing the installed APK.
+
 # PumpQuest — Champion Edition 1.0
 
 **Train in real life. See it on your character.**

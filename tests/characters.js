@@ -4,7 +4,7 @@
 const assert = require('node:assert/strict');
 const fs = require('fs'), vm = require('vm'), path = require('path');
 const root = path.resolve(__dirname,'..');
-let drawCount=0,drawnTriangles=0,callback=null;
+let drawCount=0,drawnTriangles=0,callback=null;const atob=s=>Buffer.from(s,'base64').toString('binary');
 const gl = new Proxy({
  VERTEX_SHADER:35633, FRAGMENT_SHADER:35632, COMPILE_STATUS:35713, LINK_STATUS:35714,
  ARRAY_BUFFER:34962,ELEMENT_ARRAY_BUFFER:34963,STATIC_DRAW:35044,FLOAT:5126,
@@ -19,8 +19,8 @@ let listeners={};const canvas={dataset:{},clientWidth:390,clientHeight:844,width
  getContext:type=>type==='webgl2'?gl:null,addEventListener:(k,cb)=>listeners[k]=cb,
  removeEventListener(){},setPointerCapture(){}};
 const context={window:{},document:{addEventListener(){}},console,Math,Float32Array,Uint16Array,
- devicePixelRatio:1, matchMedia:()=>({matches:false}),requestAnimationFrame:cb=>(callback=cb,1),cancelAnimationFrame:()=>{}};
-vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'scene3d.js'),'utf8'),context);
+ atob,devicePixelRatio:1, matchMedia:()=>({matches:false}),requestAnimationFrame:cb=>(callback=cb,1),cancelAnimationFrame:()=>{}};
+vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'assets/sculpt.js'),'utf8'),context);vm.runInContext(fs.readFileSync(path.join(root,'scene3d.js'),'utf8'),context);
 const model=context.window.PQ3D.create(canvas);
 const counts={};
 let tick=1000;for(const s of ['bruiser','shell','kaiju']){
@@ -29,5 +29,5 @@ let tick=1000;for(const s of ['bruiser','shell','kaiju']){
  counts[s]=drawCount;
 }
 assert.ok(new Set(Object.values(counts)).size===3,'All three have unique geometry counts');
-assert.equal(model.getRenderer(),'WebGL2');model.dispose();
+assert.equal(model.getRenderer(),'WebGL2');model.setQuality('balanced');model.setQuality('cinematic');model.dispose();
 console.log('PASS: Three distinct 3D meshes, scene rendering, selectable characters:',counts);

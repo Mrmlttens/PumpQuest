@@ -205,3 +205,24 @@ body{background:#050a12!important;color:var(--text)!important;-webkit-tap-highli
 .pq-reorder .icon-btn{min-height:34px;min-width:29px;padding:3px}
 @keyframes pq-reward-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.pq-reward-splash:before{animation:none}}
+
+/* Champion Edition 1.1 — fantasy atmosphere, not dashboard ornament. */
+#pq3d-world {background: radial-gradient(ellipse at 51% 34%,#376280 0%,#1b3c59 29%,#0d2138 59%,#040913 100%)}
+#pq3d-world .pq-sky {overflow:hidden;background:
+ radial-gradient(ellipse at 11% 27%,#e6d6af29 0%,transparent 30%),
+ radial-gradient(ellipse at 83% 17%,#d8e0e521 0%,transparent 28%),
+ radial-gradient(ellipse at 61% 46%,#a8cee626 0%,transparent 43%),
+ linear-gradient(157deg,#597b8c3d 0%,transparent 43%,#091323ef 100%)}
+#pq3d-world .pq-sky:before {content:"";position:absolute;inset:-15%;background:
+ radial-gradient(ellipse at 28% 36%,#e8ebdd1f 0%,transparent 22%),
+ radial-gradient(ellipse at 70% 32%,#b9d0e526 0%,transparent 27%),
+ radial-gradient(ellipse at 46% 72%,#8dbdcd28 0%,transparent 25%);
+ filter:blur(38px);pointer-events:none;animation:pq-cloud-drift 28s ease-in-out infinite alternate}
+#pq3d-world .pq-sky:after {content:"";position:absolute;inset:0;background:
+ linear-gradient(118deg,transparent 20%,#b4e7fc20 28%,transparent 39%),
+ linear-gradient(68deg,transparent 46%,#e2d6b610 55%,transparent 65%);
+ mix-blend-mode:screen;pointer-events:none}
+.pq-mountain{opacity:.30!important;filter:drop-shadow(0 -2px 4px #a0d6f036)}
+.pq-ground-haze{opacity:.62!important;filter:blur(12px)!important}
+@keyframes pq-cloud-drift{from{transform:translate3d(-1.7%,0,0) scale(1)}to{transform:translate3d(2%,.6%,0) scale(1.035)}}
+@media(prefers-reduced-motion:reduce){#pq3d-world .pq-sky:before{animation:none}}

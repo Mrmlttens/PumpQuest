@@ -21,7 +21,7 @@ function lookAt(eye,center,up=[0,1,0]){const z=norm(sub(eye,center)),x=norm(cros
 function geo(){return {v:[],n:[],i:[]}}
 function vertex(g,p,n){g.v.push(...p);g.n.push(...n);return g.v.length/3-1}
 function tri(g,a,b,c){g.i.push(a,b,c)}
-function uvBall(rows=17,cols=24,rough=0,seed=0){const g=geo();for(let y=0;y<=rows;y++){let theta=PI*y/rows;for(let x=0;x<=cols;x++){let phi=2*PI*x/cols,sn=Math.sin(theta);let nx=sn*Math.cos(phi),ny=Math.cos(theta),nz=sn*Math.sin(phi),rad=1;
+function uvBall(rows=27,cols=36,rough=0,seed=0){const g=geo();for(let y=0;y<=rows;y++){let theta=PI*y/rows;for(let x=0;x<=cols;x++){let phi=2*PI*x/cols,sn=Math.sin(theta);let nx=sn*Math.cos(phi),ny=Math.cos(theta),nz=sn*Math.sin(phi),rad=1;
  if(rough){const n=Math.sin(nx*19+seed)*Math.sin(ny*17.5+seed*.73)*Math.sin(nz*15+seed*.43)+Math.sin(nx*31+ny*13+nz*7+seed)*.4;rad+=n*rough}
  vertex(g,[nx*rad,ny*rad,nz*rad],[nx,ny,nz]);}}
 for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){let a=y*(cols+1)+x,b=a+cols+1;tri(g,a,a+1,b);tri(g,b,a+1,b+1);}return g}
@@ -45,29 +45,96 @@ void main(){vec3 p=aPos; p.xz*=1.0+uBreath;vec4 wp=uM*vec4(p,1.);vWorld=wp.xyz;v
 const FS=`#version 300 es
 precision highp float;
 in vec3 vN,vWorld,vLocal;out vec4 frag;
-uniform vec3 uColor,uGlow,uEye;uniform float uMetal,uRough,uTime,uHot,uCold,uFur;
+uniform vec3 uColor,uGlow,uEye;uniform float uMetal,uRough,uTime,uHot,uCold,uFur,uMatType,uQuality,uSculpt;uniform vec2 uRegionHeat[19];
 float hash(vec3 p){p=fract(p*.1031);p+=dot(p,p.yxz+33.33);return fract((p.x+p.y)*p.z);}
 float noise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+vec2 paintHeat(vec3 p){
+ float a=abs(p.x); bool front=p.z>0.0;
+ if(p.y>4.8&&a<1.15)return uRegionHeat[13];
+ if(p.y>4.35&&a<1.05&&front)return uRegionHeat[0];
+ if(p.y>4.0&&a<1.05&&front)return uRegionHeat[1];
+ if(p.y>4.3&&a>1.06){if(!front)return uRegionHeat[4];return a>1.43?uRegionHeat[3]:uRegionHeat[2];}
+ if(p.y>3.35&&a>1.35)return front?uRegionHeat[5]:uRegionHeat[6];
+ if(p.y>2.14&&a>1.55)return uRegionHeat[7];
+ if(p.y>3.0&&p.y<4.1&&a<.62&&front)return uRegionHeat[8];
+ if(p.y>3.0&&p.y<4.0&&a<1.1&&front)return uRegionHeat[9];
+ if(p.y>3.2&&p.y<4.35&&!front)return a>.54?uRegionHeat[12]:uRegionHeat[14];
+ if(p.y>2.8&&p.y<3.3&&!front)return uRegionHeat[15];
+ if(p.y>2.0&&p.y<2.8&&!front)return uRegionHeat[16];
+ if(p.y>1.45&&p.y<2.8)return front?(a<.4?uRegionHeat[11]:uRegionHeat[10]):uRegionHeat[17];
+ if(p.y<1.45)return uRegionHeat[18];
+ return vec2(0.0);
+}
 void main(){
- vec3 n=normalize(vN);vec3 p=vWorld;
- float pores=noise(p*43.)-.5;float grain=noise(p*8.)-.5;
- vec3 key=normalize(vec3(-.55,.82,1.25)),fill=normalize(vec3(.83,.36,-.53)),back=normalize(vec3(.02,.47,-1.));
+ vec3 p=vWorld;vec3 n=normalize(vN);vec3 surface=uColor;
+ // Cinematic material layering. Procedural micro detail is anchored to the world,
+ // so rotating the camera does not make the textures swim over the surface.
+ float coarse=noise(p*5.4),micro=noise(p*41.0),fine=noise(p*121.0);
+ float fur=clamp(uFur,0.,1.),metal=clamp(uMetal,0.,1.);
+ float material=uMatType;
+ float fiber=.5+.5*sin(p.y*148.+sin(p.x*33.)*2.1+p.z*46.);
+ float skinPore=mix(micro,fine*.55+micro*.45,.34);
+ float stoneVein=smoothstep(.68,.78,noise(p*15.+vec3(coarse*5.)));
+ float engraved=pow(abs(sin(p.y*57.0+p.x*15.0+coarse*3.0)),38.0);
+ if(material<.5){ // organic skin: pores, muscle striation and subtle color variation
+    float folds=.5+.5*sin(p.y*24.+p.x*13.+sin(p.z*12.)*2.);
+    surface *= .83+.24*coarse+.11*skinPore+.024*folds;
+ }else if(material<1.5){ // fibrous mane, beard and fur
+    surface *= .64+.38*fiber+.22*micro;
+ }else if(material<2.5){ // forged metal with fine etched wear
+    surface *= .68+.3*coarse+.16*engraved+.10*micro;
+ }else if(material<3.5){ // worn leather
+    surface *= .72+.28*coarse+.16*micro;
+ }else if(material<4.5){ // striated horn and bone
+    surface *= .72+.22*coarse+.12*abs(sin(p.y*37.+p.x*11.));
+ }else if(material<5.5){ // crystalline accents
+    surface *= .90+.14*coarse;
+ }else{ // mineral and reptile plates
+    surface *= .67+.3*coarse+.12*stoneVein+.09*micro;
+ }
+ // Very small geometry-independent normal perturbation: readable sculpted detail,
+ // while avoiding high-cost dynamic normal maps on mobile GPUs.
+ if(uQuality>.5){
+   float bump=(micro-.5)*.085+(fine-.5)*.035;
+   if(material>1.5&&material<2.5)bump*=.48;
+   n=normalize(n+vec3(bump,-bump*.65,bump*.45));
+ }
+ vec3 key=normalize(vec3(-.57,.87,1.14));
+ vec3 fill=normalize(vec3(.83,.42,.58));
+ vec3 bounce=normalize(vec3(-.3,-.4,.4));
+ vec3 coolRim=normalize(vec3(.31,.48,-.90));
  vec3 view=normalize(vec3(-p.x*.036,3.45-p.y,11.-p.z));
- float diffuse=max(0.,dot(n,key)),cool=max(0.,dot(n,fill)),rim=pow(1.-clamp(dot(n,view),0.,1.),2.65);
- float backLight=max(0.,dot(n,back));
- float fiber=uFur*(.5+.5*sin(p.y*157.+p.x*73.+grain*16.))*.05;
- vec3 surface=uColor*(.94+grain*(uMetal>.5?.12:.26)+pores*.12+fiber);
- vec3 ambient=vec3(.15,.19,.26);
- vec3 color=surface*(ambient+vec3(1.34,1.13,.88)*diffuse*.78+vec3(.35,.66,.83)*cool*.33);
- color+=surface*vec3(.21,.61,.95)*rim*.73;
- color+=vec3(.55,.88,1.)*backLight*.09;
- vec3 halfv=normalize(key+view);float roughness=mix(31.,105.,uMetal);float spec=pow(max(0.,dot(n,halfv)),roughness);
- color+=mix(vec3(.58,.60,.61),surface*1.5,uMetal)*spec*(.13+1.5*uMetal);
- // Tone-mapped environmental highlights make stone, fur, steel and leather distinct.
- color+=vec3(1.0,.40,.12)*uHot*(.13+.37*rim)+vec3(.03,.58,1.)*uCold*(.17+.52*rim);
- color+=uGlow*(.82+.23*sin(uTime*1.7));
- color=color/(color+vec3(.44));
- color=pow(max(color,vec3(0.)),vec3(.93));
+ float nl=max(dot(n,key),0.);float nf=max(dot(n,fill),0.);
+ float nr=max(dot(n,coolRim),0.);
+ float nb=max(dot(n,bounce),0.);
+ float facing=clamp(dot(n,view),0.,1.);
+ float rim=pow(1.-facing,3.2);
+ float cavity=.85+.15*smoothstep(.15,.9,nl);
+ float occlusion=mix(1.,.83,smoothstep(0.1,0.8,coarse));
+ vec3 direct=vec3(1.18,.93,.73)*nl*.98+vec3(.24,.51,.77)*nf*.45;
+ vec3 bounceLight=vec3(.18,.28,.33)*nb*.25;
+ vec3 ambient=vec3(.13,.17,.24);
+ vec3 color=surface*(ambient+direct+bounceLight)*cavity*occlusion;
+ // Artist-directed highlights: metallic specularity, leather softness, skin sheen.
+ vec3 H=normalize(key+view);
+ float gloss=mix(18.,104.,metal);
+ if(material<.5)gloss=29.;
+ if(material>1.5&&material<2.5)gloss=105.;
+ if(material>4.5&&material<5.5)gloss=182.;
+ float sp=pow(max(dot(n,H),0.),gloss);
+ float fresnel=pow(1.-facing,5.);
+ vec3 reflectance=mix(vec3(.068),surface*.77+.08,metal);
+ color+=reflectance*sp*(.64+2.9*metal);
+ color+=vec3(.12,.39,.73)*nr*.28+vec3(.31,.68,1.)*rim*.22;
+ color+=reflectance*fresnel*(.10+.21*metal);
+ // Glow is tied only to actual logged muscle activity, never fake recovery advice.
+ vec2 bodyHeat=uSculpt>.5?paintHeat(p):vec2(0.0);
+ color+=vec3(1.0,.24,.09)*(uHot+bodyHeat.x)*(.12+.42*rim)+vec3(.04,.48,.96)*(uCold+bodyHeat.y)*(.14+.45*rim);
+ color+=uGlow*(.75+.22*sin(uTime*1.0));
+ // ACES filmic tonemapping gives metallics controlled highlights instead of neon white.
+ color=max(color,vec3(0.0));
+ color=(color*(2.51*color+.03))/(color*(2.43*color+.59)+.14);
+ color=pow(clamp(color,0.,1.),vec3(.94));
  frag=vec4(color,1.0);
 }`;
 const PVS=`#version 300 es
@@ -80,9 +147,19 @@ in float vAlpha,vSeed;out vec4 frag;uniform vec3 uTint;uniform float uKind;
 void main(){vec2 p=gl_PointCoord*2.-1.;float d=dot(p,p);if(d>1.)discard;float a=pow(1.-d,1.5)*vAlpha;vec3 c=mix(uTint,vec3(1.,.89,.67),step(.82,vSeed));if(uKind>1.5){a*=.65;c=mix(c,vec3(1.,.53,.19),.35);}frag=vec4(c,a);}`;
 function shader(gl,v,f){const compile=(type,source)=>{const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s};let p=gl.createProgram(),a=compile(gl.VERTEX_SHADER,v),b=compile(gl.FRAGMENT_SHADER,f);gl.attachShader(p,a);gl.attachShader(p,b);gl.bindAttribLocation(p,0,'aPos');gl.bindAttribLocation(p,1,'aNormal');gl.bindAttribLocation(p,2,'aSeed');gl.linkProgram(p);gl.deleteShader(a);gl.deleteShader(b);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));return p}
 function gpuMesh(gl,g){const vao=gl.createVertexArray();gl.bindVertexArray(vao);const attrib=(data,slot,size)=>{let buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);gl.enableVertexAttribArray(slot);gl.vertexAttribPointer(slot,size,gl.FLOAT,false,0,0)};attrib(g.v,0,3);attrib(g.n,1,3);const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(g.i),gl.STATIC_DRAW);gl.bindVertexArray(null);return{vao,count:g.i.length}}
-function geometryLib(gl){return {ball:gpuMesh(gl,uvBall()),fur:gpuMesh(gl,coneMesh()),gem:gpuMesh(gl,octa()),rock:gpuMesh(gl,uvBall(17,22,.19,2.4))}}
-function bodyNodes(gl,lib,character='bruiser'){const nodes=[];const attach=(geometry,material,pos=[0,0,0],sz=[1,1,1],opts={})=>{nodes.push({geometry,material,position:pos,scale:sz,rz:opts.rz||0,rx:opts.rx||0,ry:opts.ry||0,region:opts.region||'',glow:opts.glow||0,metal:opts.metal||0,fur:opts.fur||0,motion:opts.motion||'',axis:opts.axis||null,name:opts.name||''});return nodes[nodes.length-1]};
-const ell=(m,p,s,o={})=>attach(lib.ball,m,p,s,o), fur=(a,b,r,m='fur',opts={})=>attach(lib.fur,m,a,[1,1,1],{...opts,axis:[a,b,r]}),stone=(p,s)=>attach(lib.rock,'rock',p,s,{metal:.2});
+// Continuous 7k-vertex sculpt replaces the visible spherical body parts with
+// one smooth anatomical surface. All source data is original and cached offline.
+function decodeSculpt(gl){
+ const raw=root.PQ_SCULPT;if(!raw)return null;
+ const unpack=(s,signed)=>{const bytes=Uint8Array.from(atob(s),c=>c.charCodeAt(0)),view=new DataView(bytes.buffer),a=[];for(let i=0;i<bytes.length;i+=2)a.push(signed?view.getInt16(i,true):view.getUint16(i,true));return a};
+ const xyz=unpack(raw.vertices,true).map(v=>v/1000),normals=unpack(raw.normals,true).map(v=>v/32767),idx=unpack(raw.indices,false);
+ if(xyz.length/3!==raw.count||normals.length!==xyz.length||idx.length!==raw.triangles*3||idx.some(i=>i>=raw.count))throw Error('Corrupt sculpt geometry');
+ return gpuMesh(gl,{v:xyz,n:normals,i:idx});
+}
+function geometryLib(gl){return {ball:gpuMesh(gl,uvBall()),fur:gpuMesh(gl,coneMesh()),gem:gpuMesh(gl,octa()),rock:gpuMesh(gl,uvBall(25,32,.19,2.4)),sculpt:decodeSculpt(gl)}}
+function bodyNodes(gl,lib,character='bruiser'){const nodes=[],hasSculpt=!!lib.sculpt;const attach=(geometry,material,pos=[0,0,0],sz=[1,1,1],opts={})=>{nodes.push({geometry,material,position:pos,scale:sz,rz:opts.rz||0,rx:opts.rx||0,ry:opts.ry||0,region:opts.region||'',glow:opts.glow||0,metal:opts.metal||0,fur:opts.fur||0,motion:opts.motion||'',axis:opts.axis||null,name:opts.name||''});return nodes[nodes.length-1]};
+if(hasSculpt)attach(lib.sculpt,'skin',[0,0,0],[1,1,1],{name:'sculpt-body',motion:'chest'});
+const ell=(m,p,s,o={})=>hasSculpt&&o.region&&['skin','skinLight'].includes(m)?null:attach(lib.ball,m,p,s,o), fur=(a,b,r,m='fur',opts={})=>attach(lib.fur,m,a,[1,1,1],{...opts,axis:[a,b,r]}),stone=(p,s)=>attach(lib.rock,'rock',p,s,{metal:.2});
 const pipe=(pts,radii,mat='horn',opts={})=>attach(gpuMesh(gl,tube(pts,radii)) ,mat,[0,0,0],[1,1,1],opts);
 // Footing: layered rock instead of a flat stage.
 for(let i=0;i<11;i++){let x=Math.cos(i*2.4)*(.7+(i%3)*.4),z=Math.sin(i*2.4)*(.8+(i%3)*.22);stone([x,-.27-(i%3)*.06,z],[.65+(i%3)*.2,.28+(i%2)*.14,.6]);}
@@ -280,29 +357,40 @@ function init(canvas){let gl=canvas.getContext('webgl2',{antialias:true,alpha:tr
   code=code.replace('transpose(inverse(mat3(uM)))','mat3(uM)');return code;
  };
  const p=shader(gl,upgrade(VS),upgrade(FS,true)),pp=shader(gl,upgrade(PVS),upgrade(PFS,true));let lib=geometryLib(gl),models={bruiser:bodyNodes(gl,lib,'bruiser')},character='bruiser',nodes=models.bruiser;
- const get=(prog,s)=>gl.getUniformLocation(prog,s),uni={P:get(p,'uP'),V:get(p,'uV'),M:get(p,'uM'),time:get(p,'uTime'),color:get(p,'uColor'),glow:get(p,'uGlow'),metal:get(p,'uMetal'),rough:get(p,'uRough'),hot:get(p,'uHot'),cold:get(p,'uCold'),fur:get(p,'uFur'),breath:get(p,'uBreath')};
+ const get=(prog,s)=>gl.getUniformLocation(prog,s),uni={P:get(p,'uP'),V:get(p,'uV'),M:get(p,'uM'),time:get(p,'uTime'),color:get(p,'uColor'),glow:get(p,'uGlow'),metal:get(p,'uMetal'),rough:get(p,'uRough'),hot:get(p,'uHot'),cold:get(p,'uCold'),fur:get(p,'uFur'),matType:get(p,'uMatType'),quality:get(p,'uQuality'),sculpt:get(p,'uSculpt'),regions:get(p,'uRegionHeat[0]'),breath:get(p,'uBreath')};
  const pUni={P:get(pp,'uP'),V:get(pp,'uV'),time:get(pp,'uTime'),tint:get(pp,'uTint'),kind:get(pp,'uKind')};
  const pbuf=gl.createVertexArray();gl.bindVertexArray(pbuf);const pv=[],ps=[];for(let i=0;i<110;i++){let a=i*2.399963,rad=.5+(i%11)*.16;pv.push(Math.cos(a)*rad,.05+(i%9)*.46,Math.sin(a)*.9);ps.push((i*.75487766)%1,(i*.414213)%1,(i*.332718)%1,(i*.193)%1);}for(let [loc,arr,sz] of [[0,pv,3],[2,ps,4]]){let b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(arr),gl.STATIC_DRAW);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,sz,gl.FLOAT,false,0,0)}gl.bindVertexArray(null);
  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
- let accent='default',gear={aura:'base',head:'base',outfit:'base'},angle=-.12,targetAngle=-.12,zoom=12.15,targetZoom=12.15,active=true,anim=0,last=0,raf=0,mode='storm',zones={},pumps={},focused=false,spin=null,touches=new Map(),lastPinch=0;
+ let quality='cinematic',accent='default',gear={aura:'base',head:'base',outfit:'base'},angle=-.12,targetAngle=-.12,zoom=12.15,targetZoom=12.15,active=true,anim=0,last=0,raf=0,mode='storm',zones={},pumps={},focused=false,spin=null,touches=new Map(),lastPinch=0;
  const colors={storm:[.24,.72,1],tide:[.15,1,.82],ember:[1,.41,.18]};
- const resize=()=>{const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);let ratio=Math.min(devicePixelRatio||1,1.65),width=Math.floor(w*ratio),height=Math.floor(h*ratio);if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}gl.viewport(0,0,width,height)};
+ const resize=()=>{const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);let ratio=Math.min(devicePixelRatio||1,quality==='cinematic'?2:1.15),width=Math.floor(w*ratio),height=Math.floor(h*ratio);if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}gl.viewport(0,0,width,height)};
  const touchDown=e=>{if(e.target!==canvas)return;canvas.setPointerCapture(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===2){let pts=[...touches.values()];lastPinch=Math.hypot(pts[0][0]-pts[1][0],pts[0][1]-pts[1][1])}spin=e.clientX};
  const touchMove=e=>{if(!touches.has(e.pointerId))return;let prev=touches.get(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===1)targetAngle+=clamp((e.clientX-prev[0])*.011,-.22,.22);else if(touches.size===2){let pts=[...touches.values()],dist=Math.hypot(pts[0][0]-pts[1][0],pts[0][1]-pts[1][1]);targetZoom=clamp(targetZoom-(dist-lastPinch)*.015,10.5,15.6);lastPinch=dist}};
  const touchUp=e=>{touches.delete(e.pointerId);spin=null};
  canvas.addEventListener('pointerdown',touchDown);canvas.addEventListener('pointermove',touchMove);canvas.addEventListener('pointerup',touchUp);canvas.addEventListener('pointercancel',touchUp);
  canvas.addEventListener('wheel',e=>{if(e.cancelable)e.preventDefault();targetZoom=clamp(targetZoom+Math.sign(e.deltaY)*.35,10.5,15.6)},{passive:false});
- function draw(t){if(!active)return;raf=requestAnimationFrame(draw);if(t-last<34)return;last=t;resize();anim=t*.001;angle+=(targetAngle-angle)*.12;zoom+=(targetZoom-zoom)*.10;
+ function draw(t){if(!active)return;raf=requestAnimationFrame(draw);if(t-last<(quality==='cinematic'?33:48))return;last=t;resize();anim=t*.001;angle+=(targetAngle-angle)*.12;zoom+=(targetZoom-zoom)*.10;
  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
  let aspect=canvas.width/canvas.height,P=perspective(.82,aspect,.1,90),eye=[Math.sin(angle)*zoom,3.22+Math.sin(angle*.3)*.2,Math.cos(angle)*zoom],Vw=lookAt(eye,[0,3.36,0]);let pulse=Math.sin(anim*.70)*.005;
- gl.useProgram(p);gl.uniformMatrix4fv(uni.P,false,new Float32Array(P));gl.uniformMatrix4fv(uni.V,false,new Float32Array(Vw));gl.uniform1f(uni.time,anim);
+ gl.useProgram(p);gl.uniformMatrix4fv(uni.P,false,new Float32Array(P));gl.uniformMatrix4fv(uni.V,false,new Float32Array(Vw));gl.uniform1f(uni.time,anim);gl.uniform1f(uni.quality,quality==='cinematic'?1:0);
+ const regionOrder=['upperChest','lowerChest','frontDelts','sideDelts','rearDelts','biceps','triceps','forearms','abs','obliques','quads','adductors','lats','traps','midBack','lowerBack','glutes','hamstrings','calves'];
+ const regionHot=new Float32Array(regionOrder.flatMap(k=>{const z=zones[k],pump=pumps[k]||0;return [(z?.status==='hot'?0.65:z?.status==='warm'?0.28:0)+Math.min(1,pump)*.3,z?.status==='cold'?.75:0]}));
+ gl.uniform2fv(uni.regions,regionHot);
  const tint=gear.aura==='cosmic'?[.72,.26,1]:gear.aura==='mint'?[.16,1,.73]:gear.aura==='pulse'?[1,.77,.33]:gear.aura==='shock'?[.3,.72,1]:accent==='pink'?[1,.45,.7]:accent==='amber'?[1,.65,.32]:accent==='teal'?[.2,1,.83]:accent==='lime'?[.65,1,.4]:colors[mode]||colors.storm;
  for(const n of nodes){if(n.name?.startsWith('gear-')){const eq=n.name.substring(5);if(eq!==gear.head&&eq!==gear.outfit)continue}let breath=n.motion==='chest'?pulse:n.motion==='head'?pulse*.3:0,pos=n.position.slice(),s=n.scale.slice();const pump=(n.region&&pumps[n.region])||0;if(pump&&n.region!=='traps'){const boost=1+.07*Math.min(1,pump);s=s.map(v=>v*boost)}if(n.motion==='head'){pos[0]+=Math.sin(anim*.34)*.016;pos[1]+=Math.sin(anim*.78)*.009}
  let mat;if(n.axis){const [a,b,r]=n.axis;mat=yAxisTransform(a,b,r,r)}else mat=mm(mm(mm(mm(trans(...pos),rz(n.rz)),ry(n.ry)),rx(n.rx)),scale(...s));
  gl.uniformMatrix4fv(uni.M,false,new Float32Array(mat));let color=PALETTES[character]?.[n.material]||MATERIALS[n.material]||MATERIALS.skin;
  gl.uniform3fv(uni.color,new Float32Array(color));let z=zones[n.region],days=z?.days;const hot=z?.status==='hot'?1:z?.status==='warm'?.48:0,cold=z?.status==='cold'?1:0;
  let pvalue=pump? Math.min(1,pump)*.42:0;let glow= n.glow||0;let gColor=n.material==='gem'||n.material==='ice'?tint:[0,0,0];
- gl.uniform3fv(uni.glow,new Float32Array(mul(gColor,glow*.4)));gl.uniform1f(uni.metal,n.metal);gl.uniform1f(uni.fur,n.fur);gl.uniform1f(uni.hot,hot*.65+pvalue);gl.uniform1f(uni.cold,cold*.8);gl.uniform1f(uni.breath,breath);
+ gl.uniform3fv(uni.glow,new Float32Array(mul(gColor,glow*.4)));gl.uniform1f(uni.metal,n.metal);gl.uniform1f(uni.fur,n.fur);
+ const matType=['skin','skinLight','muzzle','nose','brown'].includes(n.material)?0:
+ ['fur','furDark'].includes(n.material)?1:
+ ['iron','steel','gold','goldBright','black'].includes(n.material)?2:
+ ['leather'].includes(n.material)?3:
+ ['horn','tip','tooth'].includes(n.material)?4:
+ ['gem','ice','lava'].includes(n.material)?5:6;
+ gl.uniform1f(uni.matType,matType);gl.uniform1f(uni.sculpt,n.name==='sculpt-body'?1:0);
+ gl.uniform1f(uni.hot,hot*.65+pvalue);gl.uniform1f(uni.cold,cold*.8);gl.uniform1f(uni.breath,breath);
  gl.bindVertexArray(n.geometry.vao);gl.drawElements(gl.TRIANGLES,n.geometry.count,gl.UNSIGNED_SHORT,0);
  }
  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);gl.useProgram(pp);gl.uniformMatrix4fv(pUni.P,false,new Float32Array(P));gl.uniformMatrix4fv(pUni.V,false,new Float32Array(Vw));gl.uniform1f(pUni.time,anim);gl.uniform3fv(pUni.tint,new Float32Array(tint));gl.uniform1f(pUni.kind,mode==='ember'?2:mode==='tide'?1:0);gl.bindVertexArray(pbuf);gl.drawArrays(gl.POINTS,0,110);gl.depthMask(true);gl.disable(gl.BLEND);
@@ -313,10 +401,11 @@ function init(canvas){let gl=canvas.getContext('webgl2',{antialias:true,alpha:tr
  function setZones(next,ps){zones=next||{};pumps=ps||{}}
  function setGear(next){gear={...gear,...(next||{})}}
  function setAccent(next){accent=next||'default'}
+ function setQuality(next){quality=next==='balanced'?'balanced':'cinematic'}
  function reset(){targetAngle=-.12;targetZoom=12.15}
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf)}else if(active){raf=requestAnimationFrame(draw)}});
  raf=requestAnimationFrame(draw);
- return{setMode,setCharacter,setGear,setAccent,setZones,reset,getRenderer:()=> webgl2?'WebGL2':'WebGL1',dispose(){active=false;cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',touchDown);canvas.removeEventListener('pointermove',touchMove);canvas.removeEventListener('pointerup',touchUp);canvas.removeEventListener('pointercancel',touchUp)}}
+ return{setMode,setCharacter,setGear,setAccent,setZones,setQuality,reset,getRenderer:()=> webgl2?'WebGL2':'WebGL1',dispose(){active=false;cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',touchDown);canvas.removeEventListener('pointermove',touchMove);canvas.removeEventListener('pointerup',touchUp);canvas.removeEventListener('pointercancel',touchUp)}}
 }
 root.PQ3D={create:init};
 })(window);
