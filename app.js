@@ -116,6 +116,7 @@
   const pages={home,train,splits,history,locker};
   if(view==='home'){$('#app').innerHTML=home()}else{$('#app').innerHTML=`<div class="pq-screen"><div class="pq-panel-shade" data-action="nav" data-view="home"></div><section class="pq-drawer"><div class="pq-drawer-top"><button data-action="nav" data-view="home" class="pq-back" aria-label="Back to character">‹ CHAMPION</button><span>YOUR QUEST</span></div><div class="pq-drawer-scroll">${(pages[view]||home)()}</div></section></div>`}
   document.body.classList.toggle('pq-panel-open',view!=='home');
+  document.body.dataset.champion=['bruiser','shell','kaiju'].includes(state.profile.species)?state.profile.species:'bruiser';
   if(window.pqHero3d){window.pqHero3d.setCharacter(state.profile.species);window.pqHero3d.setMode(heroEffect());window.pqHero3d.setZones(anatomyData().zones,{})}
   if(modal)renderModal();else $('#modal-root').innerHTML='';
  }

@@ -5,7 +5,7 @@ const elements=new Map();
 function element(id){if(!elements.has(id))elements.set(id,{innerHTML:'',classList:{add(){},remove(){}},value:'',style:{},addEventListener(){},append(){},remove(){}});return elements.get(id)}
 const listeners={};
 const store=new Map();
-const context={console,Date,Math,JSON,Number,String,Array,Map,Set,Promise,setInterval:()=>{},setTimeout:()=>0,clearTimeout:()=>{},structuredClone,location:{protocol:'file:'},navigator:{},window:{scrollTo(){}},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{querySelector:s=>element(s),body:{classList:{add(){},remove(){},toggle(){},contains(){return false}}},getElementById:()=>element('pq3d-canvas'),addEventListener:(name,fn)=>listeners[name]=fn},};
+const context={console,Date,Math,JSON,Number,String,Array,Map,Set,Promise,setInterval:()=>{},setTimeout:()=>0,clearTimeout:()=>{},structuredClone,location:{protocol:'file:'},navigator:{},window:{scrollTo(){}},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{querySelector:s=>element(s),body:{dataset:{},classList:{add(){},remove(){},toggle(){},contains(){return false}}},getElementById:()=>element('pq3d-canvas'),addEventListener:(name,fn)=>listeners[name]=fn},};
 context.window.window=context.window;
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(root,'data.js'),'utf8'),context);
