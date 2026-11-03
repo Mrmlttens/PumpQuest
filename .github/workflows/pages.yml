@@ -1,34 +1,25 @@
-name: Deploy PumpQuest to GitHub Pages
+name: PumpQuest code tests
 on:
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: true
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout PumpQuest
         uses: actions/checkout@v4
-      - name: Smoke test app logic
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify JavaScript syntax
+        run: |
+          node --check scene3d.js
+          node --check app.js
+      - name: Exercise, XP, and saved-workout tests
         run: node tests/smoke.js
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - name: Upload static app
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Anatomy and 14-day cold spot tests
+        run: node tests/anatomy.js
