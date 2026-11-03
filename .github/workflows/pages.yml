@@ -17,6 +17,7 @@ jobs:
           node-version: '22'
       - name: Verify JavaScript syntax
         run: |
+          node --check artmap.js
           node --check scene3d.js
           node --check app.js
           node --check importer.js
@@ -25,6 +26,8 @@ jobs:
         run: node tests/smoke.js
       - name: Anatomy and 14-day cold spot tests
         run: node tests/anatomy.js
+      - name: Illustrated 19-zone front/back map and clickable regions
+        run: node tests/artmap.js
       - name: Three distinct 3D champions and render switching
         run: node tests/characters.js
       - name: Hevy import, deduplication, conversion and progress analytics

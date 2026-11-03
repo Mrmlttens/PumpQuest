@@ -1,3 +1,28 @@
+# PumpQuest — Illustrated Anatomy Edition v1.2
+
+A cinematic, Android-first workout tracker built around a **full-screen illustrated champion with real training-recency highlights directly on the body**. The underlying workout engine remains the same offline-first engine from Champion Edition 1.0.
+
+### New home screen
+
+- One-screen hero with radial Workout, Splits, History, Gear, Muscles and Progress controls.
+- Tap painted anatomy regions to see how many days since you logged that muscle.
+- Flip the illustration front/back. 19 regions are mapped across both orientations.
+- Red = 0–1 days, amber = 2–6, neutral = 7–13, cyan = 14+ days since logged training. Never-trained areas show no data, not cold.
+- An explicit DEMO mode previews hot/cold effects without creating workout records or XP.
+- Stormhorn now has illustrated front/back art with subtle glimmers and particles. The other two original 3D heroes stay available from Gear while their cinematic 2D artwork is produced.
+
+### Try it
+
+Web test build: https://mrmlttens.github.io/the-oddsfathers/pumpquest/ (existing dedicated hosting route)
+
+On Chrome Android, visit the live URL, then use the browser's **Add to Home screen** option. Download an APK from GitHub Actions only after a successful Android run; export JSON first if already using an older debug APK.
+
+The 1.2 build uses the original local save schema so logged sessions, splits, levels, history and XP carry over in the same browser origin.
+
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) for exact changes and known limitations.
+
+---
+
 # PumpQuest — Cinematic Engine 1.1 preview
 
 This is a *visual-engine preview*, not a promise that its procedural characters now match the approved cinematic concept art. The art production gap is documented in `ART_PIPELINE.md`.

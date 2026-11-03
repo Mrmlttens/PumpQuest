@@ -6,7 +6,7 @@ on:
     paths:
       - 'android/**'
       - 'index.html'
-      - 'styles.css'
+      - '*.css'
       - '*.js'
       - 'assets/**'
       - '.github/workflows/android.yml'
