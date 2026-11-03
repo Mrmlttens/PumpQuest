@@ -39,3 +39,74 @@ body{background:radial-gradient(ellipse at 50% -10%,#172d49 0%,#091322 47%,#080e
 .effect-ember .rune-halo{border-color:#ffad6b88;box-shadow:0 0 17px #e8623f66}.effect-tide .rune-halo{border-color:#62ecd3aa;box-shadow:0 0 17px #51bfb36c}
 @media(max-width:630px){.shell{padding-left:12px;padding-right:12px}.home-rework .hero-stage{height:clamp(440px,125vw,540px)}.home-title{margin-top:3px}.streak-slim{font-size:9px}.home-rework .hero-stage .hero-portrait img{object-position:50% 39%}.hero-bottom strong{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.hero-smoke i,.rune-halo{animation:none!important}}
+
+/* 3D fullscreen one-screen presentation is the final layout override */
+/* PumpQuest v0.4 - ONE-SCREEN cinematic 3D hero. No persistent bottom navigation. */
+html,body{min-height:100%;overscroll-behavior:none}
+body{background:#07111b!important;color:#f3f4f7!important}
+#pq3d-world{position:fixed;inset:0;overflow:hidden;z-index:1;background:radial-gradient(ellipse at 52% 31%,#49677b 0%,#23445c 24%,#111d2c 52%,#070f1b 100%);isolation:isolate;}
+#pq3d-world:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 50% 50%,transparent 25%,#020910ae 100%),linear-gradient(180deg,#060f2370 0%,transparent 16%,transparent 57%,#060d1bea 100%)}
+.pq-sky{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at 50% 30%,#8aa0a223 1%,transparent 53%),linear-gradient(155deg,#0f2e4966 2%,transparent 48%,#102e4980 80%)}
+.pq-mountain{position:absolute;bottom:11%;width:100%;height:45%;opacity:.28;background:linear-gradient(130deg,#55788b,#0d2434);clip-path:polygon(0 94%,0 66%,18% 43%,31% 70%,43% 29%,53% 48%,69% 17%,83% 56%,100% 30%,100% 100%)}
+.pq-mountain-two{bottom:6%;height:29%;opacity:.34;transform:scaleX(-1);background:linear-gradient(125deg,#192d40,#0a1725)}
+#pq3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:2;touch-action:none;cursor:grab;user-select:none;}
+#pq3d-canvas:active{cursor:grabbing}
+.pq-portrait-fallback{display:none;position:absolute;inset:1% -7% 0;z-index:1;background:linear-gradient(180deg,transparent 70%,#07101c99),url('./assets/storm-titan.webp') center 42%/cover no-repeat;filter:saturate(.9) brightness(.84);animation:pq-breathe 11s ease-in-out infinite alternate;transform-origin:50% 56%}
+.pq-webgl-fallback .pq-portrait-fallback{display:block}
+.pq-webgl-fallback #pq3d-canvas{display:none}
+.pq-ground-haze{position:absolute;z-index:3;bottom:-8%;height:31%;width:150%;left:-25%;background:radial-gradient(ellipse at 50% 70%,#1b4c7388 0%,#08122180 33%,transparent 75%);pointer-events:none}
+body.pq-panel-open #pq3d-world{filter:brightness(.49)}
+#app{position:relative;z-index:8;min-height:100dvh;pointer-events:none}
+#app button,#app input,#app select,#app textarea,#app a,#app .pq-panel-shade{pointer-events:auto}
+#modal-root{position:relative;z-index:50;pointer-events:auto}
+#toast{z-index:100!important}
+.pq-home{position:relative;width:100%;height:100dvh;min-height:520px;max-height:1100px;overflow:hidden;pointer-events:none;font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
+.pq-home-top{position:absolute;z-index:10;top:max(13px,env(safe-area-inset-top));left:20px;right:20px;display:flex;justify-content:space-between;align-items:flex-start;text-shadow:0 2px 12px #000}
+.pq-mini-brand{display:flex;flex-direction:column;gap:0}.pq-mini-brand strong{font-family:Georgia,'Times New Roman',serif;font-size:clamp(23px,6.2vw,29px);letter-spacing:.05em;color:#f6e4b8;text-shadow:0 0 12px #61b7f940,0 2px 14px #000}
+.pq-mini-brand strong span{color:#8fdbfa}.pq-mini-brand small{font-size:8.5px;font-weight:800;letter-spacing:.25em;color:#b5c9db}
+.pq-settings{width:40px;height:40px;border-radius:50%;border:1px solid #97bbd158;background:#0a1b2aaa;backdrop-filter:blur(12px);color:#e8dfcc;font-size:22px}
+.pq-level-strip{position:absolute;top:calc(max(65px,env(safe-area-inset-top) + 62px));left:17px;right:17px;display:flex;gap:9px;align-items:center;z-index:8}
+.pq-level-orb{width:51px;height:51px;border:2px solid #dfbd85;border-radius:50%;background:radial-gradient(circle at 30% 30%,#3f5c75,#0d2033 75%);box-shadow:0 0 22px #77bfe734;color:#fff0ce;display:grid;place-items:center;font-size:12px;font-weight:950;flex-shrink:0}
+.pq-xp-block{min-width:0;flex:1}.pq-xp-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:5px}.pq-xp-head b{font-size:10px;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 5px #000}.pq-xp-head small{font-size:9px;color:#bee4ee;white-space:nowrap}
+.pq-xp-bar{height:6px;background:#07101c;border-radius:10px;overflow:hidden;border:1px solid #4f7999}.pq-xp-bar i{height:100%;display:block;background:linear-gradient(90deg,#2d8de4,#6feaff,#ffcc7b);box-shadow:0 0 13px #58d8ff}
+.pq-streak{display:flex;align-items:center;flex-direction:column;justify-content:center;font-size:21px;font-weight:850;color:#ffd28f;text-shadow:0 0 10px #ffa63491;line-height:1}.pq-streak small{font-size:8px;letter-spacing:.08em;margin-top:3px}
+.pq-orb-field{position:absolute;inset:0;pointer-events:none;z-index:7}
+.orb{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:0;color:#eefaff;padding:0;transform:translateY(-50%);width:72px;height:90px;filter:drop-shadow(0 3px 9px #0009);font-family:inherit;cursor:pointer}
+.orb-left{left:max(4px,env(safe-area-inset-left))}.orb-right{right:max(4px,env(safe-area-inset-right))}
+.orb-one{top:31%}.orb-two{top:48%}.orb-three{top:65%}
+.orb-icon{display:grid;place-items:center;width:55px;height:55px;border-radius:100%;border:2px solid #9ac1d5b3;background:radial-gradient(circle at 40% 29%,#32526dca 0%,#0d1b2edc 73%);box-shadow:0 0 0 3px #020a1457,inset 0 0 17px #6ca4e048,0 0 18px #51b2ee3e;color:#e8d4af;font-size:27px;backdrop-filter:blur(8px);transition:transform .13s,border-color .13s}
+.orb:active .orb-icon{transform:scale(.94);border-color:#d5f8ff}
+.orb-label{font-size:9px;letter-spacing:.075em;font-weight:900;text-shadow:0 2px 4px #000,0 0 14px #000;white-space:nowrap}
+.orb:first-child .orb-icon{color:#aaf0ff;border-color:#92ecff;box-shadow:0 0 17px #2cb5f46d,inset 0 0 16px #30769b86}
+.pq-status-line{position:absolute;bottom:24%;left:17px;right:17px;display:flex;gap:8px;align-items:center;justify-content:center;color:#d5eafa;text-shadow:0 0 5px #000;font-size:9px;letter-spacing:.09em;font-weight:800;white-space:nowrap;z-index:6}
+.pq-status-pip{height:6px;width:6px;background:#79dffb;box-shadow:0 0 9px #79dffb;border-radius:50%}.pq-status-sep{opacity:.4}.pq-rotate-tip{color:#b6c9d5;font-size:8px;font-weight:600}
+.pq-bottom-hud{position:absolute;left:0;right:0;bottom:0;padding:15px 18px max(14px,env(safe-area-inset-bottom));height:22%;min-height:160px;background:linear-gradient(180deg,transparent 0%,#040d19d9 22%,#07111cf5 52%,#07121d 100%);z-index:10;pointer-events:none}
+.pq-hud-row{display:flex;align-items:center;justify-content:space-between;gap:14px}.pq-hud-row>div{display:flex;flex-direction:column;gap:3px}.pq-hud-row small{color:#859eaf;font-size:8px;letter-spacing:.17em;font-weight:900}.pq-hud-row strong{color:#e5eff7;font-size:11px;letter-spacing:.07em}.pq-cold-count{border:1px solid #5a7e98a3;border-radius:10px;padding:7px 10px;background:#132b3cb3;font-size:10px;font-weight:900;color:#a4dcf4;white-space:nowrap;pointer-events:auto;cursor:pointer}
+.pq-start{height:54px;border-radius:13px;margin-top:12px;width:100%;border:1px solid #bbdff3;background:linear-gradient(110deg,#f0d29d 0%,#deaa64 35%,#c18a4f 100%);color:#1a1b20;font-weight:1000;font-size:13px;letter-spacing:.17em;text-align:center;position:relative;box-shadow:0 4px 25px #c49d5b47,inset 0 2px #fff7;pointer-events:auto}
+.pq-start span{position:absolute;right:17px;top:9px;font-size:26px;font-weight:500}
+.pq-nextline{text-align:center;font-size:8px;letter-spacing:.085em;font-weight:750;margin-top:10px;color:#a4b0bf;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.pq-screen{position:fixed;inset:0;z-index:20;pointer-events:none}
+.pq-panel-shade{position:absolute;inset:0;background:#06101a94;backdrop-filter:blur(3px)}
+.pq-drawer{position:absolute;bottom:0;left:0;right:0;max-height:91dvh;background:linear-gradient(150deg,#101d2c,#0a1521 40%,#09131e);border:1px solid #6483a26b;border-bottom:0;box-shadow:0 -19px 60px #000a;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;pointer-events:auto}
+.pq-drawer-top{height:56px;min-height:56px;padding:0 18px;border-bottom:1px solid #365168;display:flex;align-items:center;justify-content:space-between;color:#89aabd;font-size:9px;font-weight:900;letter-spacing:.15em}
+.pq-back{border:0;background:transparent;color:#e5c996;font-size:12px;font-weight:950;letter-spacing:.04em;padding:12px 2px}
+.pq-drawer-scroll{overflow-y:auto;overscroll-behavior:contain;min-height:0;padding:12px 14px max(25px,env(safe-area-inset-bottom));flex:1}
+.pq-drawer-scroll>.page{margin:0 auto;padding:4px 0 18px;width:100%;max-width:660px}
+.pq-drawer .pagehead h1{font-size:25px}.pq-drawer .pagehead{margin-bottom:20px}
+.pq-drawer .character-config{display:block}.pq-drawer .character-config>.showcase{display:none}
+.pq-drawer .card,.pq-drawer .panel{background:#142638dc}
+.pq-drawer .btn.primary{background:#b5dfff!important;color:#091725!important}
+.pq-drawer-scroll .cta-row{flex-wrap:wrap}
+@media(min-width:680px){.pq-home{max-width:500px;margin:auto}.pq-drawer{width:min(640px,100%);left:50%;transform:translateX(-50%);max-height:94dvh}.pq-orb-left{left:1%}.pq-orb-right{right:1%}#pq3d-world{max-width:900px;left:50%;transform:translateX(-50%)}}
+@media(max-height:700px){.orb-one{top:33%}.orb-two{top:51%}.orb-three{top:69%}.orb-icon{height:48px;width:48px}.orb{height:75px}.pq-status-line{display:none}.pq-bottom-hud{min-height:139px;padding-top:7px}.pq-start{height:44px;margin-top:9px}.pq-mini-brand strong{font-size:24px}}
+@media(prefers-reduced-motion:reduce){.pq-portrait-fallback{animation:none}}
+@keyframes pq-breathe{to{transform:scale(1.008) translateY(-2px)}}
+/* Override legacy ornament named .orb to make action hit-targets genuinely radial. */
+.pq-home .orb{left:auto;right:auto;top:auto;transform:translateY(-50%);box-shadow:none;pointer-events:auto;filter:drop-shadow(0 3px 9px #0009)}
+.pq-home .orb:before,.pq-home .orb:after{content:none!important;display:none!important}
+.pq-home .orb-left{left:4px!important;right:auto!important}
+.pq-home .orb-right{right:4px!important;left:auto!important}
+.pq-home .orb-one{top:31%}.pq-home .orb-two{top:48%}.pq-home .orb-three{top:65%}
+.pq-drawer .bottom-tools{bottom:0}
+.pq-webgl-fallback .pq-rotate-tip{font-size:0!important}
+.pq-webgl-fallback .pq-rotate-tip:after{content:'3D UNAVAILABLE • TRY CHROME WITH HARDWARE GRAPHICS';font-size:8px}
