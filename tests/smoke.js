@@ -17,7 +17,7 @@ vm.runInContext(fs.readFileSync(path.join(root,'app.js'),'utf8'),context);
 const click=(action,dataset={})=>{const target={dataset:{action,...dataset},closest:()=>target};listeners.click({target,preventDefault(){}})};
 const input=(field,index,set,value)=>listeners.input({target:{dataset:{input:field,index:String(index),set:String(set)},value:String(value)}});
 assert(element('#app').innerHTML.includes('pq-home'),'Full-screen hero home rendered');
-assert(element('#app').innerHTML.includes('STORMHORN'),'Cinematic Stormhorn champion shown');
+assert(element('#app').innerHTML.includes('IRON VANGUARD'),'Cinematic illustrated champion shown');
 assert(element('#app').innerHTML.includes('pq-art-svg'),'Body map lives on the illustrated avatar');
 assert(element('#app').innerHTML.includes('champion-stormhorn-front.webp'),'Front illustration loaded');
 click('preview');

@@ -12,10 +12,19 @@ assert 'skin-contract.js' in (R/'index.html').read_text()
 for side in ('front','back'):
  p=R/'assets'/f'champion-stormhorn-{side}.webp';raw=p.read_bytes()
  assert raw.startswith(b'RIFF') and raw[8:12]==b'WEBP',f'{p} is not WebP'
- assert raw[12:16]==b'VP8 ',f'Unexpected compression: {p}'
- assert raw[23:26]==b'\x9d\x01\x2a', f'VP8 signature not found: {p}'
- w=struct.unpack('<H',raw[26:28])[0] & 0x3fff
- h=struct.unpack('<H',raw[28:30])[0] & 0x3fff
+ assert raw[12:16] in (b'VP8 ',b'VP8L',b'VP8X'),f'Unexpected compression: {p}'
+ if raw[12:16]==b'VP8 ':
+  assert raw[23:26]==b'\x9d\x01\x2a', f'VP8 signature not found: {p}'
+  w=struct.unpack('<H',raw[26:28])[0] & 0x3fff
+  h=struct.unpack('<H',raw[28:30])[0] & 0x3fff
+ elif raw[12:16]==b'VP8X':
+  w=int.from_bytes(raw[24:27],'little')+1
+  h=int.from_bytes(raw[27:30],'little')+1
+ else:
+  assert raw[20]==0x2f, f'VP8L signature not found: {p}'
+  a=int.from_bytes(raw[21:25],'little')
+  w=(a&0x3fff)+1
+  h=((a>>14)&0x3fff)+1
  assert (w,h)==(941,1672),f'Art mismatches canonical canvas: {p} = {w}x{h}'
  g=R/'art'/f'MASTER_{side.upper()}.svg'
  assert g.is_file() and 'pq-19-region-art-v1' in g.read_text(),f'Missing master template: {g}'

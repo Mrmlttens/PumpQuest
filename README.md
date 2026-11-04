@@ -1,3 +1,15 @@
+# PumpQuest 1.4 — Full-Bleed Front/Back Edition
+
+- Full-screen background and aligned front/back art composition.
+- Original full-front muscular warrior art, paired rear view, no UI baked into character images.
+- One fixed 941x1672 anatomy hit-map for all skins, 19 muscle regions.
+- Workout-first design: saved routines with weekdays, last logged weight/reps prefill, one-tap sets, editable history.
+- Zero subscriptions, browser/device-local save format preserved.
+- Old 3D heroes accessible from Gear; visual quality varies.
+- New illustrated textures are an iterative release, not a finished clinical anatomical atlas.
+
+See ART_SKIN_CONTRACT.md and prior release notes for production rules.
+
 # PumpQuest — Week-Test v1.3 (Workout-First)
 
 **Train with fewer taps.** This is a functional workout-UX improvement over v1.2, not a final commercial release.

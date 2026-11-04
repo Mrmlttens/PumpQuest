@@ -30,7 +30,7 @@
 
 ## Existing art status (important)
 
-The current Stormhorn front/back paintings were produced before this contract. Their relative body proportions are not consistent, particularly shoulder span and scale in the rear view. **Same pixels ≠ aligned body.** Both can still be used in the prototype, but they are `approval: reference` and must be re-rendered or manually registered to the locked guides before production release. Do not describe them as fully validated. Future skins must not repeat this mistake.
+The paired Iron Vanguard illustrations in v1.4 are rendered and posed front-on under the new contract. Both views now share one exact SVG coordinate system and were transformed into matching full-body registration canvases. **Technical registration is complete, but anatomical visual sign-off is still provisional.** Pixel dimensions alone do not prove individual muscle boundaries are perfectly painted. The skin stays `approval: reference` until manual human sign-off across both orientations. Do not describe them as fully validated. Future skins must not repeat this mistake.
 
 ## Skins without duplicating the map
 
