@@ -1,3 +1,5 @@
+> For all illustrated 2D skins, the authoritative rig and quality gates are in [ART_SKIN_CONTRACT.md](ART_SKIN_CONTRACT.md). This document is retained for the legacy 3D prototype.
+
 # PumpQuest — Character Art Standard (November 2026)
 
 ## What this pass delivers

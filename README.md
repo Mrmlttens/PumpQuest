@@ -1,3 +1,18 @@
+# PumpQuest — Week-Test v1.3 (Workout-First)
+
+**Train with fewer taps.** This is a functional workout-UX improvement over v1.2, not a final commercial release.
+
+- Tap Workout → choose a saved routine. Routines can be assigned to weekdays or kept flexible.
+- For repeat exercises, the most recent valid completed weight/reps auto-fill, so an unchanged set needs only a checkmark.
+- Completed sessions can be viewed, corrected, renamed and re-dated; historical corrections do not award bonus XP.
+- Existing `pumpquest.save.v1` local history and Hevy imports are preserved.
+- Smaller, less cluttered illustrated home, front/back orientation, real training-recency overlays and clear selection.
+- Fixed 941 × 1672 **canonical illustration rig** and front/back artist guides, with an internal `?artQA=1` overlay. Future skins share the exact 19-region map. The current Stormhorn art remains an **unapproved reference** with visible alignment defects; it needs matched artwork before final release. See [ART_SKIN_CONTRACT.md](ART_SKIN_CONTRACT.md).
+
+Run `node tests/workflow.js`, `node tests/artmap.js`, `node tests/smoke.js`, `python3 tests/skin_contract.py`. The app is offline-first; export JSON backups regularly.
+
+---
+
 # PumpQuest — Illustrated Anatomy Edition v1.2
 
 A cinematic, Android-first workout tracker built around a **full-screen illustrated champion with real training-recency highlights directly on the body**. The underlying workout engine remains the same offline-first engine from Champion Edition 1.0.
