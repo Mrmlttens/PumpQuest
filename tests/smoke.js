@@ -40,7 +40,7 @@ assert(element('#modal-root').innerHTML.includes('QUEST COMPLETE'),'Summary show
 click('goHome');
 assert(element('#app').innerHTML.includes('RECENT REGIONS'),'Recently trained muscles influence hero status');
 assert(element('#app').innerHTML.includes('state-hot'),'Workout updates hot spots directly on character');
-assert(element('#app').innerHTML.includes('MUSCLES'),'Anatomy control shown');
+assert(element('#app').innerHTML.includes('MAP ON'),'Anatomy control shown');
 click('nav',{view:'history'});
 assert(element('#app').innerHTML.includes('Your progress.'),'History screen rendered');
 assert(element('#app').innerHTML.includes('Body map'),'Anatomy body map rendered');
